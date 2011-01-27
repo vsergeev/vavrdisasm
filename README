@@ -16,20 +16,21 @@ Table of Contents
 
 1. ABOUT vAVRdisasm
 ================================================================================
-vAVRdisasm is an AVR program disassembler. It supports all 142 AVR instructions 
-as defined by the Atmel AVR Instruction Set, revision 0856I-AVR-07/10.
+vAVRdisasm is an Atmel AVR 8-bit RISC firmware disassembler. This single-pass
+disassembler can read Atmel Generic, Intel HEX8, and Motorola S-Record formatted
+files containing valid AVR program binaries.
 
-This single-pass disassembler supports Atmel Generic, Intel HEX8, and Motorola 
-S-Record formatted files containing valid AVR program binaries.
+It supports all 142 AVR 8-bit RISC instructions as defined by the Atmel AVR
+Instruction Set, revision 0856I-AVR-07/10.
 
 vAVRdisasm features a handful of formatting options, including:
  - Printing the instruction address alongside disassembly, enabled by default
- - Printing he destination comments of relative branch/jump/call instructions,
-   enabled by default
+ - Printing the destination address of relative branch/jump/call instructions
+   as comments alongside disassembly, enabled by default
  - Ghetto Address Labels (see "Ghetto Address Labels" section)
  - Formatting data constants in different bases (hexadecimal, binary, decimal)
  - .DW data word directive for data not recognized as an instruction during
-   disassembly
+   disassembly. 
 
 vAVRdisasm should work on most *nix platforms, including a Cygwin environment.
 vAVRdisasm was written by Vanya A. Sergeev, and tested with the GNU C Compiler 
@@ -38,7 +39,7 @@ com.
 
 2. LICENSE
 ================================================================================
-vAVRdisasm is released under the GNU General Public License.
+vAVRdisasm is released under the GNU General Public License Version 2.
     You should have received a copy of the GNU General Public License
     along with this program; see the file "COPYING".  If not, visit
     http://www.gnu.org or write to the Free Software Foundation, Inc.,
@@ -46,7 +47,7 @@ vAVRdisasm is released under the GNU General Public License.
 
 3. COMPILING vAVRdisasm
 ================================================================================
-Simply by running,
+Simply running,
 $ make
  in the vAVRdisasm project directory should compile vAVRdisasm on most
 *nix systems, including a Cygwin environment. The Makefile is configured to use
@@ -65,7 +66,7 @@ vAVRdisasm prints its disassembly output to stdout.
 
 	vAVRdisasm will auto-recognize Atmel Generic, Intel HEX8, and Motorola 
 	S-Record files by their file extensions, but if it fails to do so, use 
-	the the -t or --file-type option to specify the file format.
+	the -t or --file-type option to specify the file format.
 	Example:
 	 $ ./vavrdisasm -t generic sampleprogram
 
@@ -103,15 +104,16 @@ vAVRdisasm supports a unique formatting feature: Ghetto Address Labels, which
 few, if not any, single-pass disassemblers implement.
 
 With the -l or --address-label option and a supplied prefix, vAVRdisasm
-will print a label containing the (ideally) non-numerical supplied prefix 
+will print a label containing the ideally non-numerical supplied prefix 
 and the address of the disassembled instruction at every instruction. Also, 
 all relative branch, jump, and call instructions will be formatted to jump
 to their designated address label.
 
 This feature enables direct re-assembly of the vAVRdisasm's disassembly.
-This can be especially useful for quick modification of the AVR program assembly
-code without having to manually format the disassembly or adjust the relative
-branch, jump, and call distances with every modification to the disassembly.
+This can be especially useful a for quick modification to the AVR program
+assembly code without having to manually format the disassembly or adjust the
+relative branch, jump, and call distances with every modification to the
+disassembly.
 
 The -l or --address-label option overrides the default printing of the
 addresses alongside disassembly. Destination comments can still be used.
@@ -138,23 +140,27 @@ may be supported in future versions of vAVRdisasm.
 ================================================================================
 vAVRdisasm's source code is heavily commented, because this disassembler was
 also a personal learning project of the author.
+
 Operand prefixes (such as "R" for register operands or "$" for data operands)
 can be customized in the format_disasm.h header file. 
+
 Field width spacing of the addresses printed alongside disassembly, and the
 destination relative address comments can be customized in the ui_disasm.c
 source file.
+
 The output file (default is stdout) can be changed in ui_disasm.c source file.
-vAVRdisasm uses libGIS (free Atmel Generic, Intel HEX8, and Motorola S-Record 
-Parser routines) to parse formatted files containing AVR program binaries.
-libGIS is available for free under a Public Domain license at:
+
+vAVRdisasm uses libGIS, a free Atmel Generic, Intel HEX, and Motorola S-Record
+Parser library to parse formatted files containing AVR program binaries. libGIS
+is available for free under both MIT and Public Domain licenses at:
 http://dev.frozeneskimo.com/software_projects:libgis
-libGIS is compiled into vAVRdisasm--it does not need to be obtained separately.
+libGIS is compiled into vAVRdisasm--it does not need to be obtained separately. 
 
 8. Sample Disassembly Outputs
 ================================================================================
 These output samples, produced by vAVRdisasm, are a disassembly of the program 
-code from the "Novice's Guide to AVR Development" article in the Atmel 
-Applications Journal.
+from the "Novice's Guide to AVR Development" article in the Atmel Applications
+Journal.
 
 $ ./vavrdisasm sampleprogram.hex 
    0:   rjmp .0         ; 0x2
