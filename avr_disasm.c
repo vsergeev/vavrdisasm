@@ -219,7 +219,7 @@ static int disassembleOperands(disassembledInstruction *dInstruction) {
 				 * matter), otherwise, the number represents a positive distance and
 				 * no bit manipulation is necessary. */
 				dInstruction->operands[i] <<= 1;
-				if (dInstruction->operands[i] & 0x80) {
+				if (dInstruction->operands[i] & 0x40) {
 					/* We can't just print out the signed operand because the type's capacity
 					 * is 16 bits, and the operand data's signedness only starts at 0x80.
 					 * Therefore we must convert to the positive value and then make the entire
@@ -244,17 +244,17 @@ static int disassembleOperands(disassembledInstruction *dInstruction) {
 				 * matter), otherwise, the number represents a positive distance and
 				 * no bit manipulation is necessary. */
 				dInstruction->operands[i] <<= 1;
-				if (dInstruction->operands[i] & 0x1000) {
+				if (dInstruction->operands[i] & 0x800) {
 					/* We can't just print out the signed operand because the type's capacity
 					 * is 16 bits, and the operand data's signedness only starts at 0x1000.
 					 * Therefore we must convert to the positive value and then make the entire
 					 * short negative. */
-					dInstruction->operands[i] = (~dInstruction->operands[i]+1)&0x7FFF;
+					dInstruction->operands[i] = (~dInstruction->operands[i]+1)&0xFFF;
 					dInstruction->operands[i] = -dInstruction->operands[i];
 				}
 				break;
 			case OPERAND_REGISTER_STARTR16:
-				dInstruction->operands[i] = 16 + dInstruction->operands[i] ;
+				dInstruction->operands[i] = 16 + dInstruction->operands[i];
 				break;
 			case OPERAND_REGISTER_EVEN_PAIR:
 				dInstruction->operands[i] = dInstruction->operands[i] * 2;
