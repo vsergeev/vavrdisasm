@@ -1,9 +1,8 @@
 /*
  * vAVRdisasm - AVR program disassembler.
- * Version 1.4 - June 2009.
  * Written by Vanya A. Sergeev - <vsergeev@gmail.com>
  *
- * Copyright (C) 2007 Vanya A. Sergeev
+ * Copyright (C) 2007-2011 Vanya A. Sergeev
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
@@ -18,8 +17,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA. 
  *
- * format_disasm.h - Header file to formatting of disassembled instructions, with
- *  regard to the several formatting features this disasssembler supports.
+ * format.h - Header file to formatting of disassembled instructions, with regard
+ *  to the several formatting features this disasssembler supports.
  *
  */
  
@@ -61,8 +60,8 @@ enum AVR_Formatting_Options {
 };
 
 /* See avr_disasm.c for more information on these variables. */
-extern int AVR_Long_Instruction;
-extern uint32_t AVR_Long_Address;
+extern int AVR_Long_Instruction_State;
+extern uint32_t AVR_Long_Instruction_Data;
 
 /* Structure to hold various formatting options supported
  * by this disassembler. */

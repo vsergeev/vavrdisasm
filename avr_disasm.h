@@ -1,9 +1,8 @@
 /*
  * vAVRdisasm - AVR program disassembler.
- * Version 1.4 - June 2009.
  * Written by Vanya A. Sergeev - <vsergeev@gmail.com>
  *
- * Copyright (C) 2007 Vanya A. Sergeev
+ * Copyright (C) 2007-2011 Vanya A. Sergeev
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
@@ -29,7 +28,7 @@
 #include <stdint.h>
 
 /* Total number of assembly instructions, Maximum number of operands */
-#define AVR_TOTAL_INSTRUCTIONS	141
+#define AVR_TOTAL_INSTRUCTIONS	145
 #define AVR_MAX_NUM_OPERANDS	2
 
 /* Enumeration for all types of AVR Operands */

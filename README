@@ -1,5 +1,5 @@
 README
-vAVRdisasm - Version 1.7 - 05/27/2010
+vAVRdisasm - Version 1.8 - 01/26/2011
 Vanya A. Sergeev - <vsergeev@gmail.com>
 ================================================================================
 Table of Contents
@@ -16,16 +16,16 @@ Table of Contents
 
 1. ABOUT vAVRdisasm
 ================================================================================
-vAVRdisasm is an AVR program disassembler. It supports all 138 AVR instructions 
-as defined by the Atmel AVR Instruction Set, revision 0856H-AVR-04/09.
+vAVRdisasm is an AVR program disassembler. It supports all 142 AVR instructions 
+as defined by the Atmel AVR Instruction Set, revision 0856I-AVR-07/10.
 
 This single-pass disassembler supports Atmel Generic, Intel HEX8, and Motorola 
 S-Record formatted files containing valid AVR program binaries.
 
 vAVRdisasm features a handful of formatting options, including:
- - Printing the instruction addresses alongside disassembly, enabled by default
- - Printing of the destination comments of relative branch/jump/call
-   instructions, enabled by default
+ - Printing the instruction address alongside disassembly, enabled by default
+ - Printing he destination comments of relative branch/jump/call instructions,
+   enabled by default
  - Ghetto Address Labels (see "Ghetto Address Labels" section)
  - Formatting data constants in different bases (hexadecimal, binary, decimal)
  - .DW data word directive for data not recognized as an instruction during

@@ -1,9 +1,8 @@
 /*
  * vAVRdisasm - AVR program disassembler.
- * Version 1.6 - February 2010.
  * Written by Vanya A. Sergeev - <vsergeev@gmail.com>
  *
- * Copyright (C) 2007 Vanya A. Sergeev
+ * Copyright (C) 2007-2011 Vanya A. Sergeev
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
@@ -18,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA. 
  *
- * avrinstructionset.c - AVR instruction set data structure stored in an
+ * avr_instructionset.c - AVR instruction set data structure stored in an
  *  array of instruction info structures, as defined in avrdisasm.h.
  *
  */
@@ -31,11 +30,11 @@
 /* I decided to have the operand masks and types here in the
  * main instruction set data structure of the disassembler for clean
  * opcode recognition and operand extraction. It's much more straight
- * forward to work with numbers (duh) then manipulating ugly operand 
+ * forward to work with numbers then manipulating ugly operand 
  * strings such as "000011rdddddrrrr" for the add instruction. */
-/* This was my first disassembler, and my program ended evolving with this
- * data structure. Turns out it makes code quite clear, and it generalizes the
- * entire disassembly process, but development probably took about 2x longer
+/* This was my first disassembler, and my program ended up evolving with this
+ * data structure. It seems to makes the code quite clear, and it generalizes
+ * the entire disassembly process, but development probably took about 2x longer
  * instead of hard coding the disassembly for different types of operands. */
 /* But this disassembler model can be applied to virtually any 16-bit
  * or less opcode architecture, making it very flexible in nature--I don't
@@ -109,6 +108,10 @@ instructionInfo instructionSet[AVR_TOTAL_INSTRUCTIONS] = {
 	{"lsr", 0x9406, 1, {0x01f0, 0x0000}, {OPERAND_REGISTER, OPERAND_NONE}},
 	{"neg", 0x9401, 1, {0x01f0, 0x0000}, {OPERAND_REGISTER, OPERAND_NONE}},
 	{"pop", 0x900f, 1, {0x01f0, 0x0000}, {OPERAND_REGISTER, OPERAND_NONE}},
+	{"xch", 0x9204, 2, {0x0000, 0x01f0}, {OPERAND_Z, OPERAND_REGISTER}},
+	{"las", 0x9205, 2, {0x0000, 0x01f0}, {OPERAND_Z, OPERAND_REGISTER}},
+	{"lac", 0x9206, 2, {0x0000, 0x01f0}, {OPERAND_Z, OPERAND_REGISTER}},
+	{"lat", 0x9207, 2, {0x0000, 0x01f0}, {OPERAND_Z, OPERAND_REGISTER}},
 	{"push", 0x920f, 1, {0x01f0, 0x0000}, {OPERAND_REGISTER, OPERAND_NONE}},
 	{"rcall", 0xd000, 1, {0x0fff, 0x0000}, {OPERAND_RELATIVE_ADDRESS, OPERAND_NONE}},
 	{"rjmp", 0xc000, 1, {0x0fff, 0x0000}, {OPERAND_RELATIVE_ADDRESS, OPERAND_NONE}},
@@ -117,7 +120,6 @@ instructionInfo instructionSet[AVR_TOTAL_INSTRUCTIONS] = {
 	{"ser", 0xef0f, 1, {0x00f0, 0x0000}, {OPERAND_REGISTER_STARTR16, OPERAND_NONE}},
 	{"swap", 0x9402, 1, {0x01f0, 0x0000}, {OPERAND_REGISTER, OPERAND_NONE}},
 	{"tst", 0x2000, 1, {0x01f0, 0x020f}, {OPERAND_REGISTER, OPERAND_REGISTER_GHOST}},
-	
 	{"adc", 0x1c00, 2, {0x01f0, 0x020f}, {OPERAND_REGISTER, OPERAND_REGISTER}},
 	{"add", 0x0c00, 2, {0x01f0, 0x020f}, {OPERAND_REGISTER, OPERAND_REGISTER}},
 	{"adiw", 0x9600, 2, {0x0030, 0x00cf}, {OPERAND_REGISTER_EVEN_PAIR_STARTR24, OPERAND_DATA}},

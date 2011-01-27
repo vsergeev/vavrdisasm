@@ -1,9 +1,8 @@
 /*
  * vAVRdisasm - AVR program disassembler.
- * Version 1.7 - May 2010.
  * Written by Vanya A. Sergeev - <vsergeev@gmail.com>
  *
- * Copyright (C) 2007 Vanya A. Sergeev
+ * Copyright (C) 2007-2011 Vanya A. Sergeev
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
@@ -34,13 +33,14 @@ extern instructionInfo instructionSet[AVR_TOTAL_INSTRUCTIONS];
  * I didn't want to do it (and instead would have liked to find a clean & clever solution that
  * doesn't expose anything between the two interfaces), for now this was the quickest (and cleanest?)
  * way to get this special case (32-bit opcode) taken care of. */
+
 /* Variable to keep track of long instructions that have been found and are to be printed. */
-int AVR_Long_Instruction = 0;
-/* Variable to hold the address of the long instructions */
-uint32_t AVR_Long_Address;
+int AVR_Long_Instruction_State = 0;
+/* Variable to hold the data of the long instruction */
+uint32_t AVR_Long_Instruction_Data;
 /* A copy of the AVR long instruction, we need to keep this so we know information about the
  * instruction (mnemonic, operands) after we've read the next 16-bits from the program file. */
-static disassembledInstruction longInstruction;
+static disassembledInstruction dLongInstruction;
 
 /* Disassembles/decodes operands back to their original form. */
 static int disassembleOperands(disassembledInstruction *dInstruction);
@@ -62,16 +62,25 @@ int disassembleInstruction(disassembledInstruction *dInstruction, const assemble
 	
 	/*** AVR SPECIFIC */
 	/* If a long instruction was found in the last instruction disassembly,
-	 * extract the rest of the address, and indicate that it is to be printed */
-	if (AVR_Long_Instruction == AVR_LONG_INSTRUCTION_FOUND) {
-		AVR_Long_Instruction = AVR_LONG_INSTRUCTION_PRINT;
-		AVR_Long_Address |= aInstruction.opcode;
-		*dInstruction = longInstruction;
+	 * extract the rest of the data, and indicate that it is to be printed */
+	if (AVR_Long_Instruction_State == AVR_LONG_INSTRUCTION_FOUND) {
+		AVR_Long_Instruction_State = AVR_LONG_INSTRUCTION_PRINT;
+		AVR_Long_Instruction_Data |= aInstruction.opcode;
+		*dInstruction = dLongInstruction;
+		/* If the long instruction data operand is a long absolute address,
+		 * multiply it by two to refer to the correct address (since each
+		 * instruction is two bytes). */	
+		for (i = 0; i < dInstruction->instruction->numOperands; i++) {
+			if (dInstruction->instruction->operandTypes[i] == OPERAND_LONG_ABSOLUTE_ADDRESS) {
+				AVR_Long_Instruction_Data <<= 1;
+				break;
+			}
+		}
 		return 0;
 	/* If a long instruction was printed in the last instruction disassembly,
 	 * reset the AVR_Call_Instruction variable back to zero. */
-	} else if (AVR_Long_Instruction == AVR_LONG_INSTRUCTION_PRINT) {
-		AVR_Long_Instruction = 0;
+	} else if (AVR_Long_Instruction_State == AVR_LONG_INSTRUCTION_PRINT) {
+		AVR_Long_Instruction_State = 0;
 	}
 	
 	/* Look up the instruction */
@@ -91,9 +100,9 @@ int disassembleInstruction(disassembledInstruction *dInstruction, const assemble
 		/* If this is an instruction with a long absolute operand, indicate that a long instruction has been found,
 		 * and extract the first part of the long address. */
 		if (dInstruction->instruction->operandTypes[i] == OPERAND_LONG_ABSOLUTE_ADDRESS) {
-			AVR_Long_Instruction = AVR_LONG_INSTRUCTION_FOUND;
-			AVR_Long_Address = dInstruction->operands[i] << 16;
-			longInstruction = *dInstruction;
+			AVR_Long_Instruction_State = AVR_LONG_INSTRUCTION_FOUND;
+			AVR_Long_Instruction_Data = dInstruction->operands[i] << 16;
+			dLongInstruction = *dInstruction;
 		}
 	}
 	
@@ -101,11 +110,11 @@ int disassembleInstruction(disassembledInstruction *dInstruction, const assemble
 	if (disassembleOperands(dInstruction) < 0)
 		return ERROR_INVALID_ARGUMENTS; /* Only possible error for disassembleOperands() */
 
-	if (AVR_Long_Instruction == AVR_LONG_INSTRUCTION_FOUND) {
+	if (AVR_Long_Instruction_State == AVR_LONG_INSTRUCTION_FOUND) {
 		/* If we found a long instruction (32-bit one),
-		 * Copy this instruction over to our special longInstruction variable, that
+		 * Copy this instruction over to our special dLongInstruction variable, that
 		 * will exist even after we move onto the next 16-bits */
-		longInstruction = *dInstruction;
+		dLongInstruction = *dInstruction;
 	}
 
 	return 0;

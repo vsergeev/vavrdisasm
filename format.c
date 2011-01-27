@@ -1,9 +1,8 @@
 /*
  * vAVRdisasm - AVR program disassembler.
- * Version 1.6 - February 2010.
  * Written by Vanya A. Sergeev - <vsergeev@gmail.com>
  *
- * Copyright (C) 2007 Vanya A. Sergeev
+ * Copyright (C) 2007-2011 Vanya A. Sergeev
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
@@ -18,8 +17,8 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA. 
  *
- * format_disasm.c - Formatting of disassembled instructions, with regard to the
- *  several formatting features this disassembler supports.
+ * format.c - Formatting of disassembled instructions, with regard to the several
+ *  formatting features this disassembler supports.
  *
  */
 
@@ -44,7 +43,7 @@ int printDisassembledInstruction(FILE *out, const disassembledInstruction dInstr
 	
 	/* If we just found a long instruction, there is nothing to be printed yet, since we don't
 	 * have the entire long address ready yet. */
-	if (AVR_Long_Instruction == AVR_LONG_INSTRUCTION_FOUND)
+	if (AVR_Long_Instruction_State == AVR_LONG_INSTRUCTION_FOUND)
 		return 0;
 	
 	/* If address labels are enabled, then we use an address label prefix as set in the
@@ -162,7 +161,7 @@ int formatDisassembledOperand(char **strOperand, int operandNum, const disassemb
 			}
 			break;
 		case OPERAND_LONG_ABSOLUTE_ADDRESS:
-			retVal = asprintf(strOperand, "%s%0*X", OPERAND_PREFIX_ABSOLUTE_ADDRESS, fOptions.addressFieldWidth, AVR_Long_Address);
+			retVal = asprintf(strOperand, "%s%0*X", OPERAND_PREFIX_ABSOLUTE_ADDRESS, fOptions.addressFieldWidth, AVR_Long_Instruction_Data);
 			break;
 		case OPERAND_IO_REGISTER:
 			retVal = asprintf(strOperand, "%s%02X", OPERAND_PREFIX_IO_REGISTER, dInstruction.operands[operandNum]);

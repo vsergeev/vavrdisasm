@@ -1,22 +1,28 @@
-Release 1.7 - 2010/05/27
+Release 1.8 - 01/26/2011
+ - Fixed address decoding for LDS, STS, JMP, and CALL instructions.
+   Reversed the modification from release 1.7.
+ - Added support for XCH, LAS, LAC, LAT instructions, bringing the disassembler
+   up to date with AVR Instruction Set revision 0856I - 07/10.
+
+Release 1.7 - 05/27/2010
  - Fixed address decoding for LDS, STS, JMP, and CALL instructions.
    Previously, vAVRdisasm was printing the disassembled address operands 
    as twice the value they should have been for these instructions.
 
-Release 1.6 - 2010/02/04
+Release 1.6 - 02/04/2010
  - Fixed the number-of-operands field for the SPM instruction. This bug was
    causing vAVRdisasm to crash as it was attempting to format a non-existing 
    operand during disassembly.
  - Updated the README.
 
-Release 1.5 - 2009/08/25
+Release 1.5 - 08/25/2009
  - Renamed source files to make more sense and for better organization of code.
  - avr_instructionset.c, avr_disasm.h, format.c:
 	* Added support for DES, SPM #2, LDS (16-bit), and STS (16-bit)
 	  instructions, bringing the disassembler to support the AVR instruction
 	  set up to revision 0856H - 04/09.
 
-Release 1.4 - 2009/06/27
+Release 1.4 - 06/27/2009
  - file_disasm.c, libGIS:
 	* Fixed handling of newlines (sometimes found at the end of program
 	  files) so an "invalid record" error doesn't appear when a newline is
@@ -25,14 +31,14 @@ Release 1.4 - 2009/06/27
 	  records in Intel Hex and Motorola S-Record files. Special thanks to 
 	  Ahmed for discovery and patch!
 
-Release 1.3 - 2009/01/08
+Release 1.3 - 01/08/2009
  - format_disasm.c
  	* Fixed a few small bugs/typos for cleaner compilation.
  - avr_disasm.c
  	* CRITICAL FIX: Corrected the absolute address calculation,
 	  used in instructions like absolute jump.
 
-Release 1.2 - 2007/01/06
+Release 1.2 - 01/06/2007
  - format_disasm.c, format_disasm.h, ui_disasm.c:
 	* Added formatting of data constants in different bases (hexadecimal, 
 	  binary, decimal).
@@ -40,5 +46,5 @@ Release 1.2 - 2007/01/06
 	* Fixed a small bug/typo: first operand of "out" instruction is
 	  actually an I/O register.
 
-Release 1.0 - 2007/01/03
+Release 1.0 - 01/03/2007
 	* Initial release.

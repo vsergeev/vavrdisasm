@@ -1,9 +1,8 @@
 /*
  * vAVRdisasm - AVR program disassembler.
- * Version 1.4 - June 2009.
  * Written by Vanya A. Sergeev - <vsergeev@gmail.com>
  *
- * Copyright (C) 2007 Vanya A. Sergeev
+ * Copyright (C) 2007-2011 Vanya A. Sergeev
  * This program is free software; you can redistribute it and/or
  * modify it under the terms of the GNU General Public License
  * as published by the Free Software Foundation; either version 2
@@ -18,7 +17,7 @@
  * along with this program; if not, write to the Free Software
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA. 
  *
- * file_disasm.h - Header file to Routines to take care of Atmel Generic, Intel HEX, 
+ * file.h - Header file to Routines to take care of Atmel Generic, Intel HEX, 
  *  and Motorola S-Record file disassembly. Interface to avr_disasm.c to and 
  *  format_disasm.c to swiftly disassemble and print an assembled instruction.
  *
