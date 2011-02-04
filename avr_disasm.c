@@ -29,11 +29,10 @@
 /* AVR instructionSet is defined in avrinstructionset.c */
 extern instructionInfo instructionSet[AVR_TOTAL_INSTRUCTIONS];
 
-/* Ugly public variables that are shared across format_disasm.c and avr_disasm.c. As much as
+/* Ugly global state that is shared across format_disasm.c and avr_disasm.c. As much as
  * I didn't want to do it (and instead would have liked to find a clean & clever solution that
  * doesn't expose anything between the two interfaces), for now this was the quickest (and cleanest?)
  * way to get this special case (32-bit opcode) taken care of. */
-
 /* Variable to keep track of long instructions that have been found and are to be printed. */
 int AVR_Long_Instruction_State = 0;
 /* Variable to hold the data of the long instruction */
