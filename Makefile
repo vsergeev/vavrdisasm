@@ -8,7 +8,7 @@ BINDIR = /usr/bin
 all: $(PROGNAME)
 
 install: $(PROGNAME)
-	install -m 0755 $(PROGNAME) $(BINDIR)
+	install -m 0755 $(PROGNAME) $(DESTDIR)$(BINDIR)
 
 $(PROGNAME): $(OBJECTS)
 	$(CC) $(LDFLAGS) -o $@ $(OBJECTS) 
@@ -17,5 +17,5 @@ clean:
 	rm -rf $(PROGNAME) $(OBJECTS)
 
 uninstall:
-	rm -f $(BINDIR)/$(PROGNAME)
+	rm -f $(DESTDIR)$(BINDIR)/$(PROGNAME)
 
