@@ -24,9 +24,9 @@
  */
 
 #include <stdio.h>
-#include "libGIS-1.0.4/atmel_generic.h"
-#include "libGIS-1.0.4/ihex.h"
-#include "libGIS-1.0.4/srecord.h"
+#include "libGIS-1.0.5/atmel_generic.h"
+#include "libGIS-1.0.5/ihex.h"
+#include "libGIS-1.0.5/srecord.h"
 #include "avr_disasm.h"
 #include "format.h"
 #include "file.h"

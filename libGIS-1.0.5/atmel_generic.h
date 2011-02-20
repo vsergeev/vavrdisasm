@@ -4,8 +4,8 @@
  * \file atmel_generic.h
  * \brief Low-level utility functions to create, read, write, and print Atmel Generic binary records.
  * \author Vanya A. Sergeev <vsergeev@gmail.com>
- * \date October 10 2009
- * \version 1.0.3
+ * \date February 2011
+ * \version 1.0.5
  */
 
 #include <stdio.h>
@@ -26,27 +26,24 @@ enum _AtmelGenericDefinitions {
 };
 
 /**
- * All possible error codes the Atmel Generic record utility functions may return.
+ * All of the possible error codes the Atmel Generic record utility functions may return.
  */
 enum AtmelGenericErrors {
-	ATMEL_GENERIC_OK = 0, /**< Error code for success or no error. */
-	ATMEL_GENERIC_ERROR_FILE = -1, /**< Error code for error while reading from or writing to a file. You may check errno for the exact error if this error code is encountered. */
-	ATMEL_GENERIC_ERROR_EOF = -2, /**< Error code for encountering end-of-file when reading from a file. */
-	ATMEL_GENERIC_ERROR_INVALID_RECORD = -3, /**< Error code for error if an invalid record was read. */
-	ATMEL_GENERIC_ERROR_INVALID_ARGUMENTS = -4, /**< Error code for error from invalid arguments passed to function. */
-	ATMEL_GENERIC_ERROR_NEWLINE = -5, /**< Error code for encountering a newline with no record when reading from a file. */
+	ATMEL_GENERIC_OK = 0, 				/**< Error code for success or no error. */
+	ATMEL_GENERIC_ERROR_FILE = -1, 			/**< Error code for error while reading from or writing to a file. You may check errno for the exact error if this error code is encountered. */
+	ATMEL_GENERIC_ERROR_EOF = -2, 			/**< Error code for encountering end-of-file when reading from a file. */
+	ATMEL_GENERIC_ERROR_INVALID_RECORD = -3, 	/**< Error code for error if an invalid record was read. */
+	ATMEL_GENERIC_ERROR_INVALID_ARGUMENTS = -4, 	/**< Error code for error from invalid arguments passed to function. */
+	ATMEL_GENERIC_ERROR_NEWLINE = -5, 		/**< Error code for encountering a newline with no record when reading from a file. */
 };
 
 /**
  * Structure to hold the fields of an Atmel Generic record.
  */
-struct _AtmelGenericRecord {
-	uint32_t address; /**< The 24-bit address field of the record. Note that the Atmel Generic record only supports 24-bit addresses, despite the additional storage capacity (32 bits) of this variable. */
-	uint16_t data; /**< The 16-bit data field of the record. */
-};
-
-/** Alias "AtmelGenericRecord" for struct _AtmelGenericRecord, done for convenience and clarity. */
-typedef struct _AtmelGenericRecord AtmelGenericRecord;
+typedef struct {
+	uint32_t address; 	/**< The 24-bit address field of the record. */
+	uint16_t data; 		/**< The 16-bit data field of the record. */
+} AtmelGenericRecord;
 
 /**
  * Sets all of the record fields of an Atmel Generic record structure.
@@ -56,7 +53,7 @@ typedef struct _AtmelGenericRecord AtmelGenericRecord;
  * \param genericRecord A pointer to the target Atmel Generic record structure where these fields will be set.
  * \return ATMEL_GENERIC_OK on success, otherwise one of the ATMEL_GENERIC_ERROR_ error codes.
  * \retval ATMEL_GENERIC_OK on success.
- * \retval ATMEL_GENERIC_ERROR_INVALID_ARGUMENTS if genericRecord does not point to a valid AtmelGenericRecord structure.
+ * \retval ATMEL_GENERIC_ERROR_INVALID_ARGUMENTS if the record pointer is NULL.
 */
 int New_AtmelGenericRecord(uint32_t address, uint16_t data, AtmelGenericRecord *genericRecord);
 
@@ -66,7 +63,7 @@ int New_AtmelGenericRecord(uint32_t address, uint16_t data, AtmelGenericRecord *
  * \param in A file pointer to an opened file that can be read.
  * \return ATMEL_GENERIC_OK on success, otherwise one of the ATMEL_GENERIC_ERROR_ error codes.
  * \retval ATMEL_GENERIC_OK on success.
- * \retval ATMEL_GENERIC_ERROR_INVALID_ARGUMENTS if genericRecord does not point to a valid AtmelGenericRecord structure or the file pointer is invalid.
+ * \retval ATMEL_GENERIC_ERROR_INVALID_ARGUMENTS if the record pointer or file pointer is NULL.
  * \retval ATMEL_GENERIC_ERROR_EOF if end-of-file has been reached.
  * \retval ATMEL_GENERIC_ERROR_FILE if a file reading error has occured.
  * \retval ATMEL_GENERIC_INVALID_RECORD if the record read is invalid (record did not match specifications).
@@ -76,22 +73,22 @@ int Read_AtmelGenericRecord(AtmelGenericRecord *genericRecord, FILE *in);
 /**
  * Writes an Atmel Generic record to an opened file.
  * Note that the Atmel Generic record only supports 24-bit addresses, so only 24-bits of the address stored in the Atmel Generic record structure that genericRecord points to will be written.
- * \param genericRecord The Atmel Generic record structure that will be written.
+ * \param genericRecord A pointer to the Atmel Generic record structure.
  * \param out A file pointer to an opened file that can be written to.
  * \return ATMEL_GENERIC_OK on success, otherwise one of the ATMEL_GENERIC_ERROR_ error codes.
  * \retval ATMEL_GENERIC_OK on success. 
- * \retval ATMEL_GENERIC_ERROR_INVALID_ARGUMENTS if the file pointer is invalid.
+ * \retval ATMEL_GENERIC_ERROR_INVALID_ARGUMENTS if the record pointer or file pointer is NULL.
  * \retval ATMEL_GENERIC_ERROR_FILE if a file writing error has occured.
 */
-int Write_AtmelGenericRecord(const AtmelGenericRecord genericRecord, FILE *out);
+int Write_AtmelGenericRecord(const AtmelGenericRecord *genericRecord, FILE *out);
 
 /**
  * Prints the contents of an Atmel Generic record structure to stdout.
  * The record dump consists of the address and data fields of the record.
- * \param genericRecord The Atmel Generic record structure that will be printed to stdout.
+ * \param genericRecord A pointer to the Atmel Generic record structure.
  * \return Always returns ATMEL_GENERIC_OK (success).
  * \retval ATMEL_GENERIC_OK on success.
 */
-void Print_AtmelGenericRecord(const AtmelGenericRecord genericRecord);
+void Print_AtmelGenericRecord(const AtmelGenericRecord *genericRecord);
 
 #endif

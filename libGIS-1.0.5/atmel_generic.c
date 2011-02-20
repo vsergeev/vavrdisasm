@@ -3,7 +3,7 @@
  *  Utility functions to create, read, write, and print Atmel Generic binary records.
  *
  *  Written by Vanya A. Sergeev <vsergeev@gmail.com>
- *  Version 1.0.3 - October 2009
+ *  Version 1.0.5 - February 2011
  *
  */
 
@@ -12,7 +12,7 @@
 /* Initializes a new AtmelGenericRecord structure that the paramater genericRecord points to with the passed
  * 24-bit integer address, and 16-bit data word. */
 int New_AtmelGenericRecord(uint32_t address, uint16_t data, AtmelGenericRecord *genericRecord) {
-	/* Assert genericRecord */
+	/* Assert genericRecord pointer */
 	if (genericRecord == NULL)
 		return ATMEL_GENERIC_ERROR_INVALID_ARGUMENTS;
 	
@@ -27,8 +27,8 @@ int Read_AtmelGenericRecord(AtmelGenericRecord *genericRecord, FILE *in) {
 	char recordBuff[ATMEL_GENERIC_RECORD_BUFF_SIZE];
 	int i;
 	
-	/* Check our file pointer and the genericRecord struct */
-	if (in == NULL || genericRecord == NULL)
+	/* Check our record pointer and file pointer */
+	if (genericRecord == NULL || in == NULL)
 		return ATMEL_GENERIC_ERROR_INVALID_ARGUMENTS;
 		
 	if (fgets(recordBuff, ATMEL_GENERIC_RECORD_BUFF_SIZE, in) == NULL) {
@@ -71,19 +71,20 @@ int Read_AtmelGenericRecord(AtmelGenericRecord *genericRecord, FILE *in) {
 }
 
 /* Utility function to write an Atmel Generic record to a file */
-int Write_AtmelGenericRecord(const AtmelGenericRecord genericRecord, FILE *out) {
-	/* Check our file pointer */
-	if (out == NULL)
+int Write_AtmelGenericRecord(const AtmelGenericRecord *genericRecord, FILE *out) {
+	/* Check our record pointer and file pointer */
+	if (genericRecord == NULL || out == NULL)
 		return ATMEL_GENERIC_ERROR_INVALID_ARGUMENTS;
 	
-	if (fprintf(out, "%2.6X%c%2.4X\r\n", genericRecord.address, ATMEL_GENERIC_SEPARATOR, genericRecord.data) < 0)
+	if (fprintf(out, "%2.6X%c%2.4X\r\n", genericRecord->address, ATMEL_GENERIC_SEPARATOR, genericRecord->data) < 0)
 		return ATMEL_GENERIC_ERROR_FILE;
 	
 	return ATMEL_GENERIC_OK;
 }
 
 /* Utility function to print the information stored in an Atmel Generic record */
-void Print_AtmelGenericRecord(const AtmelGenericRecord genericRecord) {
-	printf("Atmel Generic Address: 0x%2.6X\n", genericRecord.address);
-	printf("Atmel Generic Data: 0x%2.4X\n", genericRecord.data); 
+void Print_AtmelGenericRecord(const AtmelGenericRecord *genericRecord) {
+	printf("Atmel Generic Address: \t0x%2.6X\n", genericRecord->address);
+	printf("Atmel Generic Data: \t0x%2.4X\n", genericRecord->data); 
 }
+

@@ -3,7 +3,7 @@
  *  Utility functions to create, read, write, and print Intel HEX8 binary records.
  *
  *  Written by Vanya A. Sergeev <vsergeev@gmail.com>
- *  Version 1.0.4 - July 2010
+ *  Version 1.0.5 - February 2011
  *
  */
 
@@ -11,8 +11,8 @@
 
 /* Initializes a new IHexRecord structure that the paramater ihexRecord points to with the passed
  * record type, 16-bit integer address, 8-bit data array, and size of 8-bit data array. */
-int New_IHexRecord(int type, uint16_t address, uint8_t data[], int dataLen, IHexRecord *ihexRecord) {
-	/* Data length size check, assertion of ihexRecord */
+int New_IHexRecord(int type, uint16_t address, const uint8_t *data, int dataLen, IHexRecord *ihexRecord) {
+	/* Data length size check, assertion of ihexRecord pointer */
 	if (dataLen < 0 || dataLen > IHEX_MAX_DATA_LEN/2 || ihexRecord == NULL)
 		return IHEX_ERROR_INVALID_ARGUMENTS;
 	
@@ -20,7 +20,7 @@ int New_IHexRecord(int type, uint16_t address, uint8_t data[], int dataLen, IHex
 	ihexRecord->address = address;
 	memcpy(ihexRecord->data, data, dataLen);
 	ihexRecord->dataLen = dataLen;
-	ihexRecord->checksum = Checksum_IHexRecord(*ihexRecord);
+	ihexRecord->checksum = Checksum_IHexRecord(ihexRecord);
 	
 	return IHEX_OK;		
 }
@@ -28,12 +28,12 @@ int New_IHexRecord(int type, uint16_t address, uint8_t data[], int dataLen, IHex
 /* Utility function to read an Intel HEX8 record from a file */
 int Read_IHexRecord(IHexRecord *ihexRecord, FILE *in) {
 	char recordBuff[IHEX_RECORD_BUFF_SIZE];
-	/* A temporary buffer to hold ascii hex encoded data, set to the maximum length we would ever need */
+	/* A temporary buffer to hold ASCII hex encoded data, set to the maximum length we would ever need */
 	char hexBuff[IHEX_ADDRESS_LEN+1];
 	int dataCount, i;
 		
-	/* Check our file pointer and the IHexRecord struct */
-	if (in == NULL || ihexRecord == NULL)
+	/* Check our record pointer and file pointer */
+	if (ihexRecord == NULL || in == NULL)
 		return IHEX_ERROR_INVALID_ARGUMENTS;
 		
 	if (fgets(recordBuff, IHEX_RECORD_BUFF_SIZE, in) == NULL) {
@@ -64,17 +64,17 @@ int Read_IHexRecord(IHexRecord *ihexRecord, FILE *in) {
 	if (recordBuff[IHEX_START_CODE_OFFSET] != IHEX_START_CODE)
 		return IHEX_ERROR_INVALID_RECORD;
 	
-	/* Copy the ascii hex encoding of the count field into hexBuff, convert it to a usable integer */
+	/* Copy the ASCII hex encoding of the count field into hexBuff, convert it to a usable integer */
 	strncpy(hexBuff, recordBuff+IHEX_COUNT_OFFSET, IHEX_COUNT_LEN);
 	hexBuff[IHEX_COUNT_LEN] = 0;
 	dataCount = strtol(hexBuff, (char **)NULL, 16);
 	
-	/* Copy the ascii hex encoding of the address field into hexBuff, convert it to a usable integer */
+	/* Copy the ASCII hex encoding of the address field into hexBuff, convert it to a usable integer */
 	strncpy(hexBuff, recordBuff+IHEX_ADDRESS_OFFSET, IHEX_ADDRESS_LEN);
 	hexBuff[IHEX_ADDRESS_LEN] = 0;
 	ihexRecord->address = strtol(hexBuff, (char **)NULL, 16);
 	
-	/* Copy the ascii hex encoding of the address field into hexBuff, convert it to a usable integer */
+	/* Copy the ASCII hex encoding of the address field into hexBuff, convert it to a usable integer */
 	strncpy(hexBuff, recordBuff+IHEX_TYPE_OFFSET, IHEX_TYPE_LEN);
 	hexBuff[IHEX_TYPE_LEN] = 0;
 	ihexRecord->type = strtol(hexBuff, (char **)NULL, 16);
@@ -83,46 +83,46 @@ int Read_IHexRecord(IHexRecord *ihexRecord, FILE *in) {
 	if (strlen(recordBuff) < (unsigned int)(1+IHEX_COUNT_LEN+IHEX_ADDRESS_LEN+IHEX_TYPE_LEN+dataCount*2+IHEX_CHECKSUM_LEN))
 		return IHEX_ERROR_INVALID_RECORD;
 	
-	/* Loop through each ascii hex byte of the data field, pull it out into hexBuff,
+	/* Loop through each ASCII hex byte of the data field, pull it out into hexBuff,
 	 * convert it and store the result in the data buffer of the Intel HEX8 record */
 	for (i = 0; i < dataCount; i++) {
-		/* Times two i because every byte is represented by two ascii hex characters */
+		/* Times two i because every byte is represented by two ASCII hex characters */
 		strncpy(hexBuff, recordBuff+IHEX_DATA_OFFSET+2*i, IHEX_ASCII_HEX_BYTE_LEN);
 		hexBuff[IHEX_ASCII_HEX_BYTE_LEN] = 0;
 		ihexRecord->data[i] = strtol(hexBuff, (char **)NULL, 16);
 	}
 	ihexRecord->dataLen = dataCount;	
 	
-	/* Copy the ascii hex encoding of the checksum field into hexBuff, convert it to a usable integer */
+	/* Copy the ASCII hex encoding of the checksum field into hexBuff, convert it to a usable integer */
 	strncpy(hexBuff, recordBuff+IHEX_DATA_OFFSET+dataCount*2, IHEX_CHECKSUM_LEN);
 	hexBuff[IHEX_CHECKSUM_LEN] = 0;
 	ihexRecord->checksum = strtol(hexBuff, (char **)NULL, 16);
 
-	if (ihexRecord->checksum != Checksum_IHexRecord(*ihexRecord))
+	if (ihexRecord->checksum != Checksum_IHexRecord(ihexRecord))
 		return IHEX_ERROR_INVALID_RECORD;
 	
 	return IHEX_OK;
 }
 
 /* Utility function to write an Intel HEX8 record to a file */
-int Write_IHexRecord(const IHexRecord ihexRecord, FILE *out) {
+int Write_IHexRecord(const IHexRecord *ihexRecord, FILE *out) {
 	int i;
 	
-	/* Check our file pointer */
-	if (out == NULL)
+	/* Check our record pointer and file pointer */
+	if (ihexRecord == NULL || out == NULL)
 		return IHEX_ERROR_INVALID_ARGUMENTS;
 		
 	/* Check that the data length is in range */
-	if (ihexRecord.dataLen > IHEX_MAX_DATA_LEN/2)
+	if (ihexRecord->dataLen > IHEX_MAX_DATA_LEN/2)
 		return IHEX_ERROR_INVALID_RECORD;
 	
 	/* Write the start code, data count, address, and type fields */
-	if (fprintf(out, "%c%2.2X%2.4X%2.2X", IHEX_START_CODE, ihexRecord.dataLen, ihexRecord.address, ihexRecord.type) < 0)
+	if (fprintf(out, "%c%2.2X%2.4X%2.2X", IHEX_START_CODE, ihexRecord->dataLen, ihexRecord->address, ihexRecord->type) < 0)
 		return IHEX_ERROR_FILE;
 		
 	/* Write the data bytes */
-	for (i = 0; i < ihexRecord.dataLen; i++) {
-		if (fprintf(out, "%2.2X", ihexRecord.data[i]) < 0)
+	for (i = 0; i < ihexRecord->dataLen; i++) {
+		if (fprintf(out, "%2.2X", ihexRecord->data[i]) < 0)
 			return IHEX_ERROR_FILE;
 	}
 	
@@ -134,30 +134,33 @@ int Write_IHexRecord(const IHexRecord ihexRecord, FILE *out) {
 }
 
 /* Utility function to print the information stored in an Intel HEX8 record */
-void Print_IHexRecord(const IHexRecord ihexRecord) {
+void Print_IHexRecord(const IHexRecord *ihexRecord) {
 	int i;
-	printf("Intel HEX8 Record Type: %d\n", ihexRecord.type);
-	printf("Intel HEX8 Record Address: 0x%2.4X\n", ihexRecord.address);
-	printf("Intel HEX8 Record Data: {");
-	for (i = 0; i < ihexRecord.dataLen; i++) {
-		printf("0x%02X, ", ihexRecord.data[i]);
+	printf("Intel HEX8 Record Type: \t%d\n", ihexRecord->type);
+	printf("Intel HEX8 Record Address: \t0x%2.4X\n", ihexRecord->address);
+	printf("Intel HEX8 Record Data: \t{");
+	for (i = 0; i < ihexRecord->dataLen; i++) {
+		if (i+1 < ihexRecord->dataLen)
+			printf("0x%02X, ", ihexRecord->data[i]);
+		else
+			printf("0x%02X", ihexRecord->data[i]);
 	}
 	printf("}\n");
-	printf("Intel HEX8 Record Checksum: 0x%2.2X\n", ihexRecord.checksum);
+	printf("Intel HEX8 Record Checksum: \t0x%2.2X\n", ihexRecord->checksum);
 }
 
 /* Utility function to calculate the checksum of an Intel HEX8 record */
-uint8_t Checksum_IHexRecord(const IHexRecord ihexRecord) {
+uint8_t Checksum_IHexRecord(const IHexRecord *ihexRecord) {
 	uint8_t checksum;
 	int i;
 
 	/* Add the data count, type, address, and data bytes together */
-	checksum = ihexRecord.dataLen;
-	checksum += ihexRecord.type;
-	checksum += (uint8_t)ihexRecord.address;
-	checksum += (uint8_t)((ihexRecord.address & 0xFF00)>>8);
-	for (i = 0; i < ihexRecord.dataLen; i++)
-		checksum += ihexRecord.data[i];
+	checksum = ihexRecord->dataLen;
+	checksum += ihexRecord->type;
+	checksum += (uint8_t)ihexRecord->address;
+	checksum += (uint8_t)((ihexRecord->address & 0xFF00)>>8);
+	for (i = 0; i < ihexRecord->dataLen; i++)
+		checksum += ihexRecord->data[i];
 	
 	/* Two's complement on checksum */
 	checksum = ~checksum + 1;

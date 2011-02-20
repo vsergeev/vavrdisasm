@@ -1,9 +1,14 @@
 ChangeLog
 
-Version 1.0.4 - 2010/07/08
+Version 1.0.5 - 02/05/2011
+	* Interface change!: write, print, and checksum functions now take a pointer to the record structure rather than a copy, for more efficient use of memory.
+	* Prettier debug printing of Intel HEX8 and SRecord records
+	* Clean up of some of the source code comments and doxygen descriptions
+
+Version 1.0.4 - 07/08/2010
 	* No source code changes since version 1.0.3, but I've released libGIS as two packages, one that is licensed as purely public domain, for locations where that applies, and one that is licensed as MIT/X11, for locations where "public domain" has no legal standing.
 
-Version 1.0.3 - 2009/10/10
+Version 1.0.3 - 10/10/2009
 	* Small bug fix: record reader functions handle newlines in data record lines better, and support for the carriage return character for Windows.
 	* Bug fix: s-record write function no longer writes an inaccurate space between the record start and record type.
 	* testGIS.c: a redefine of strcasecmp to stricmp for Windows support.
