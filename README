@@ -32,10 +32,10 @@ vAVRdisasm features a handful of formatting options, including:
  - .DW data word directive for data not recognized as an instruction during
    disassembly. 
 
-vAVRdisasm should work on most *nix platforms, including a Cygwin environment.
-vAVRdisasm was written by Vanya A. Sergeev, and tested with the GNU C Compiler 
-on Linux. Feel free to send any ideas or suggestions to vsergeev at gmail dot 
-com.
+vAVRdisasm should work on most *nix platforms, including a Cygwin or MinGW
+environment. vAVRdisasm was written by Vanya A. Sergeev, and tested with the
+GNU C Compiler on Linux. Feel free to send any ideas or suggestions to vsergeev
+at gmail dot com.
 
 2. LICENSE
 ================================================================================
@@ -50,8 +50,8 @@ vAVRdisasm is released under the GNU General Public License Version 2.
 Simply running,
 $ make
  in the vAVRdisasm project directory should compile vAVRdisasm on most
-*nix systems, including a Cygwin environment. The Makefile is configured to use
-GCC to compile vAVRdisasm.
+*nix systems, including a Cygwin or MinGW environment. The Makefile is
+configured to use GCC to compile vAVRdisasm.
 vAVRdisasm should have no problem being compiled with "gmake".
 
 4. USING vAVRdisasm
