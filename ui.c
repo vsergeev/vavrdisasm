@@ -70,12 +70,9 @@ static void printUsage(FILE *stream, const char *programName) {
   -h, --help			Display this usage/help.\n\
   -v, --version			Display the program's version.\n\n");
 	fprintf(stream, "Supported file types:\n\
-  Atmel Generic - File Type: generic\n\
-  Auto-recognized with .gen file extension.\n\n\
-  Intel HEX8 - File Type: ihex\n\
-  Auto-recognized with .hex, .ihex, and .ihx file extensions.\n\n\
-  Motorola S-Record - File Type: srecord\n\
-  Auto-recognized with .srec and .sre file extensions.\n\n");
+  Atmel Generic			generic\n\
+  Intel HEX8 			ihex\n\
+  Motorola S-Record 		srecord\n\n");
 }
 
 static void printVersion(FILE *stream) {
@@ -86,7 +83,7 @@ static void printVersion(FILE *stream) {
 int main (int argc, const char *argv[]) {
 	int optc;
 	FILE *fileIn, *fileOut;
-	char fileType[8], *fileExtension;
+	char fileType[8];
 	int (*disassembleFile)(FILE *, FILE *, formattingOptions);
 	formattingOptions fOptions;
 
@@ -94,7 +91,7 @@ int main (int argc, const char *argv[]) {
 	fOptions.options = 0;
 	/* Set default address field width for this version. */
 	fOptions.addressFieldWidth = 3;
-	/* Default to stdout output file */
+	/* Default output file to stdout */
 	fileOut = stdout;
 
 	fileType[0] = '\0';	
@@ -145,45 +142,50 @@ int main (int argc, const char *argv[]) {
 		perror("Error: Cannot open output file for writing");
 		exit(EXIT_FAILURE);
 	}
-		
+	
+	/* If there are no more arguments left */	
 	if (optind == argc) {
 		fprintf(stderr, "Error: No program file specified! Use - for standard input.\n\n");
 		printUsage(stderr, argv[0]);
+		fclose(fileOut);
 		exit(EXIT_FAILURE);
 	}
 
-	/* If no file type was specified, try to auto-recognize the file type by extension. */
-	if (fileType[0] == '\0' && strlen(argv[optind]) > 1) {
-		fileExtension = rindex(argv[optind], '.');
-		if (fileExtension == NULL) {
-			fprintf(stderr, "Unable to auto-recognize file type by extension.\n");
-			fprintf(stderr, "Please specify file type with -t,--file-type option.\n");
-			exit(EXIT_FAILURE);
-		}
-		/* To skip the dot */
-		fileExtension++;
-		if (strcasecmp(fileExtension, "gen") == 0) 
-			strcpy(fileType, "generic");
-		else if (strcasecmp(fileExtension, "ihx") == 0)
-			strcpy(fileType, "ihex");
-		else if (strcasecmp(fileExtension, "hex") == 0)
-			strcpy(fileType, "ihex");
-		else if (strcasecmp(fileExtension, "ihex") == 0)
-			strcpy(fileType, "ihex");
-		else if (strcasecmp(fileExtension, "srec") == 0)
-			strcpy(fileType, "srecord");
-		else if (strcasecmp(fileExtension, "sre") == 0)
-			strcpy(fileType, "srecord");
-		else {
-			fprintf(stderr, "Unable to auto-recognize file type by extension.\n");
-			fprintf(stderr, "Please specify file type with -t,--file-type option.\n");
+	/* Support reading from stdin with filename "-" */
+	if (strcmp(argv[optind], "-") == 0) {
+		fileIn = stdin;
+	} else {
+		fileIn = fopen(argv[optind], "r");
+		if (fileIn == NULL) {
+			perror("Error: Cannot open program file for disassembly");
+			fclose(fileOut);
 			exit(EXIT_FAILURE);
 		}
 	}
 
-	/* I check the fileType string here and set the disassembleFile
-	 * pointer so I don't have to do any file type error checking after
-	 * I've opened the file, this means cleaner error handling. */
+	/* If no file type was specified, try to auto-recognize the first character of the file */
+	if (fileType[0] == '\0') {
+		int c;
+		c = fgetc(fileIn);
+		/* Intel HEX8 record statements start with : */
+		if ((char)c == ':')
+			strcpy(fileType, "ihex");
+		/* Motorola S-Record record statements start with S */
+		else if ((char)c == 'S')
+			strcpy(fileType, "srecord");
+		/* Atmel Generic record statements start with a ASCII hex digit */
+		else if ( ((char)c >= '0' && (char)c <= '9') || ((char)c >= 'a' && (char)c <= 'f') || ((char)c >= 'A' && (char)c <= 'F') )
+			strcpy(fileType, "generic");
+		else {
+			fprintf(stderr, "Unable to auto-recognize file type by first character.\n");
+			fprintf(stderr, "Please specify file type with -t,--file-type option.\n");
+			fclose(fileOut);	
+			fclose(fileIn);
+			exit(EXIT_FAILURE);
+		}
+		ungetc(c, fileIn);
+	}
+
 	if (strcasecmp(fileType, "generic") == 0)
 		disassembleFile = disassembleGenericFile;
 	else if (strcasecmp(fileType, "ihex") == 0)
@@ -196,18 +198,9 @@ int main (int argc, const char *argv[]) {
 		else
 			fprintf(stderr, "Unspecified file type.\n");
 		fprintf(stderr, "See program help/usage for supported file types.\n");
+		fclose(fileOut);	
+		fclose(fileIn);
 		exit(EXIT_FAILURE);
-	}
-
-	/* Support reading from stdin with filename "-" */
-	if (strcmp(argv[optind], "-") == 0) {
-		fileIn = stdin;
-	} else {
-		fileIn = fopen(argv[optind], "r");
-		if (fileIn == NULL) {
-			perror("Error: Cannot open program file for disassembly");
-			exit(EXIT_FAILURE);
-		}
 	}
 
 	disassembleFile(fileOut, fileIn, fOptions);
