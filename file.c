@@ -193,7 +193,7 @@ int disassembleSRecordFile(FILE *fileOut, FILE *fileIn, formattingOptions fOptio
 		}
 
 		/* Skip the record if it's not a data record */
-		if (srec.type != SRECORD_TYPE_S1 || srec.type != SRECORD_TYPE_S2 || srec.type != SRECORD_TYPE_S3)
+		if (srec.type != SRECORD_TYPE_S1 && srec.type != SRECORD_TYPE_S2 && srec.type != SRECORD_TYPE_S3)
 			continue;
 
 		aInstruction.address = srec.address;
