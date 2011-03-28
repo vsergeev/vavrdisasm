@@ -23,7 +23,7 @@ static int SRecord_Address_Lengths[] = {
 	4, // S9
 };
 
-/* Initializes a new IHexRecord structure that the paramater srec points to with the passed
+/* Initializes a new SRecord structure that the paramater srec points to with the passed
  * S-Record type, up to 32-bit integer address, 8-bit data array, and size of 8-bit data array. */
 int New_SRecord(int type, uint32_t address, const uint8_t *data, int dataLen, SRecord *srec) {
 	/* Data length size check, assertion of srec pointer */
