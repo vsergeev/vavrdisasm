@@ -147,7 +147,7 @@ int main (int argc, const char *argv[]) {
 	}
 		
 	if (optind == argc) {
-		fprintf(stderr, "Error: No program file specified! Use - for stdin.\n\n");
+		fprintf(stderr, "Error: No program file specified! Use - for standard input.\n\n");
 		printUsage(stderr, argv[0]);
 		exit(EXIT_FAILURE);
 	}
@@ -211,7 +211,8 @@ int main (int argc, const char *argv[]) {
 	}
 
 	disassembleFile(fileOut, fileIn, fOptions);
-	
+
+	fclose(fileOut);	
 	fclose(fileIn);
 
 	exit(EXIT_SUCCESS);
