@@ -31,13 +31,14 @@
 #include "errorcodes.h"
 
 /* Flags for some long options that don't have a short option equivilant */
-static int no_addresses = 0;				/* Flag for --no-addresses */
+static int no_addresses = 0;			/* Flag for --no-addresses */
 static int no_destination_comments = 0;		/* Flag for --no-destination-comments */
 static int data_base = 0;			/* Base of data constants (hexadecimal, binary, decimal) */
 
 static struct option long_options[] = {
 	{"address-label", required_argument, NULL, 'l'},
 	{"file-type", required_argument, NULL, 't'},
+	{"out-file", required_argument, NULL, 'o'},
 	{"data-base-hex", no_argument, &data_base, FORMAT_OPTION_DATA_HEX},
 	{"data-base-bin", no_argument, &data_base, FORMAT_OPTION_DATA_BIN},
 	{"data-base-dec", no_argument, &data_base, FORMAT_OPTION_DATA_DEC},
@@ -50,9 +51,10 @@ static struct option long_options[] = {
 
 static void printUsage(FILE *stream, const char *programName) {
 	fprintf(stream, "Usage: %s <option(s)> <file>\n", programName);
-	fprintf(stream, " Disassembles AVR program file <file>.\n");
+	fprintf(stream, " Disassembles AVR program file <file>. Use - for standard input.\n");
 	fprintf(stream, " Written by Vanya A. Sergeev - <vsergeev@gmail.com>.\n\n");
 	fprintf(stream, " Additional Options:\n\
+  -o, --out-file <output file>	Write to output file instead of standard output.\n\
   -t, --file-type <type>	Specify the file type of the object file.\n\
   -l, --address-label <prefix> 	Create ghetto address labels with \n\
 				the specified label prefix.\n\
@@ -92,12 +94,12 @@ int main (int argc, const char *argv[]) {
 	fOptions.options = 0;
 	/* Set default address field width for this version. */
 	fOptions.addressFieldWidth = 3;
-	/* Just print to stdout for this version */
+	/* Default to stdout output file */
 	fileOut = stdout;
 
 	fileType[0] = '\0';	
 	while (1) {
-		optc = getopt_long(argc, (char * const *)argv, "l:t:hv", long_options, NULL);
+		optc = getopt_long(argc, (char * const *)argv, "o:t:l:hv", long_options, NULL);
 		if (optc == -1)
 			break;
 		switch (optc) {
@@ -110,6 +112,10 @@ int main (int argc, const char *argv[]) {
 				break;
 			case 't':
 				strncpy(fileType, optarg, sizeof(fileType));
+				break;
+			case 'o':
+				if (strcmp(optarg, "-") != 0)
+					fileOut = fopen(optarg, "w");
 				break;
 			case 'h':
 				printUsage(stderr, argv[0]);
@@ -134,15 +140,20 @@ int main (int argc, const char *argv[]) {
 		fOptions.options |= FORMAT_OPTION_DATA_DEC;
 	else
 		fOptions.options |= FORMAT_OPTION_DATA_HEX;
+
+	if (fileOut == NULL) {
+		perror("Error: Cannot open output file for writing");
+		exit(EXIT_FAILURE);
+	}
 		
 	if (optind == argc) {
-		fprintf(stderr, "Error: No program file specified!\n\n");
+		fprintf(stderr, "Error: No program file specified! Use - for stdin.\n\n");
 		printUsage(stderr, argv[0]);
 		exit(EXIT_FAILURE);
 	}
 
 	/* If no file type was specified, try to auto-recognize the file type by extension. */
-	if (fileType[0] == '\0') {
+	if (fileType[0] == '\0' && strlen(argv[optind]) > 1) {
 		fileExtension = rindex(argv[optind], '.');
 		if (fileExtension == NULL) {
 			fprintf(stderr, "Unable to auto-recognize file type by extension.\n");
@@ -180,15 +191,23 @@ int main (int argc, const char *argv[]) {
 	else if (strcasecmp(fileType, "srecord") == 0)
 		disassembleFile = disassembleSRecordFile;
 	else {
-		fprintf(stderr, "Unknown file type %s.\n", fileType);
+		if (fileType[0] != '\0')
+			fprintf(stderr, "Unknown file type %s.\n", fileType);
+		else
+			fprintf(stderr, "Unspecified file type.\n");
 		fprintf(stderr, "See program help/usage for supported file types.\n");
 		exit(EXIT_FAILURE);
 	}
-	
-	fileIn = fopen(argv[optind], "r");
-	if (fileIn == NULL) {
-		perror("Error: Cannot open program file for disassembly");
-		exit(EXIT_FAILURE);
+
+	/* Support reading from stdin with filename "-" */
+	if (strcmp(argv[optind], "-") == 0) {
+		fileIn = stdin;
+	} else {
+		fileIn = fopen(argv[optind], "r");
+		if (fileIn == NULL) {
+			perror("Error: Cannot open program file for disassembly");
+			exit(EXIT_FAILURE);
+		}
 	}
 
 	disassembleFile(fileOut, fileIn, fOptions);
@@ -197,3 +216,4 @@ int main (int argc, const char *argv[]) {
 
 	exit(EXIT_SUCCESS);
 }
+
