@@ -142,13 +142,13 @@ vAVRdisasm's source code is heavily commented, because this disassembler was
 also a personal learning project of the author.
 
 Operand prefixes (such as "R" for register operands or "$" for data operands)
-can be customized in the format_disasm.h header file. 
+can be customized in the format.h header file. 
 
 Field width spacing of the addresses printed alongside disassembly, and the
 destination relative address comments can be customized in the ui.c
 source file.
 
-The output file (default is stdout) can be changed in ui_disasm.c source file.
+The output file (default is stdout) can be changed in ui.c source file.
 
 vAVRdisasm uses libGIS, a free Atmel Generic, Intel HEX, and Motorola S-Record
 Parser library to parse formatted files containing AVR program binaries. libGIS
