@@ -33,11 +33,11 @@
  * and so that the printing of the formatted operand is not hard coded into the format operand code.
  * If an addressLabelPrefix is specified in formattingOptions (option is set and string is not NULL), 
  * it will print the relative branch/jump/call with this prefix and the destination address as the label. */
-static int formatDisassembledOperand(char **strOperand, int operandNum, const disassembledInstruction dInstruction, formattingOptions fOptions);
+static int formatDisassembledOperand(char **strOperand, int operandNum, const disassembledInstruction *dInstruction, formattingOptions fOptions);
 
 
 /* Prints a disassembled instruction, formatted with options set in the formattingOptions structure. */
-int printDisassembledInstruction(FILE *out, const disassembledInstruction dInstruction, formattingOptions fOptions) {
+int printDisassembledInstruction(FILE *out, const disassembledInstruction *dInstruction, formattingOptions fOptions) {
 	int retVal, i;
 	char *strOperand;
 	
@@ -50,20 +50,20 @@ int printDisassembledInstruction(FILE *out, const disassembledInstruction dInstr
 	 * string addressLabelPrefix, because labels need to start with non-numerical character
 	 * for best compatibility with AVR assemblers. */	
 	if (fOptions.options & FORMAT_OPTION_ADDRESS_LABEL) 
-		retVal = fprintf(out, "%s%0*X: %s ", fOptions.addressLabelPrefix, fOptions.addressFieldWidth, dInstruction.address, dInstruction.instruction->mnemonic);
+		retVal = fprintf(out, "%s%0*X: %s ", fOptions.addressLabelPrefix, fOptions.addressFieldWidth, dInstruction->address, dInstruction->instruction->mnemonic);
 	/* Just print the address that the instruction is located at, without address labels. */
 	else if (fOptions.options & FORMAT_OPTION_ADDRESS) 
-		retVal = fprintf(out, "%4X:\t%s ", dInstruction.address, dInstruction.instruction->mnemonic);
+		retVal = fprintf(out, "%4X:\t%s ", dInstruction->address, dInstruction->instruction->mnemonic);
 	else 
-		retVal = fprintf(out, "%s ", dInstruction.instruction->mnemonic);
+		retVal = fprintf(out, "%s ", dInstruction->instruction->mnemonic);
 
 	if (retVal < 0)
 		return ERROR_FILE_WRITING_ERROR;
 
-	for (i = 0; i < dInstruction.instruction->numOperands; i++) {
+	for (i = 0; i < dInstruction->instruction->numOperands; i++) {
 		/* If we're not on the first operand, but not on the last one either, print a comma separating
 		 * the operands. */
-		if (i > 0 && i != dInstruction.instruction->numOperands) {
+		if (i > 0 && i != dInstruction->instruction->numOperands) {
 			if (fprintf(out, ", ") < 0)
 				return ERROR_FILE_WRITING_ERROR;
 		}
@@ -82,13 +82,13 @@ int printDisassembledInstruction(FILE *out, const disassembledInstruction dInstr
 	 * i.e. rcall .+4 ; 0x56
 	 */
 	if (fOptions.options & FORMAT_OPTION_DESTINATION_ADDRESS_COMMENT) {
-		for (i = 0; i < dInstruction.instruction->numOperands; i++) {
+		for (i = 0; i < dInstruction->instruction->numOperands; i++) {
 			/* This is only done for operands with relative addresses,
 			 * where the destination address is relative from the address 
 			 * the PC is on. */
-			if (dInstruction.instruction->operandTypes[i] == OPERAND_BRANCH_ADDRESS ||
-				dInstruction.instruction->operandTypes[i] == OPERAND_RELATIVE_ADDRESS) {
-					if (fprintf(out, "%1s\t; %s%X", "", OPERAND_PREFIX_ABSOLUTE_ADDRESS, dInstruction.address+dInstruction.operands[i]+2) < 0)
+			if (dInstruction->instruction->operandTypes[i] == OPERAND_BRANCH_ADDRESS ||
+				dInstruction->instruction->operandTypes[i] == OPERAND_RELATIVE_ADDRESS) {
+					if (fprintf(out, "%1s\t; %s%X", "", OPERAND_PREFIX_ABSOLUTE_ADDRESS, dInstruction->address+dInstruction->operands[i]+2) < 0)
 						return ERROR_FILE_WRITING_ERROR;
 					/* Stop after one relative address operand */
 					break;
@@ -106,11 +106,11 @@ int printDisassembledInstruction(FILE *out, const disassembledInstruction dInstr
  * and so that the printing of the formatted operand is not hard coded into the format operand code.
  * If an addressLabelPrefix is specified in formattingOptions (option is set and string is not NULL), 
  * it will print the relative branch/jump/call with this prefix and the destination address as the label. */
-int formatDisassembledOperand(char **strOperand, int operandNum, const disassembledInstruction dInstruction, formattingOptions fOptions) {
+int formatDisassembledOperand(char **strOperand, int operandNum, const disassembledInstruction *dInstruction, formattingOptions fOptions) {
 	char binary[9];
 	int retVal;
 
-	switch (dInstruction.instruction->operandTypes[operandNum]) {
+	switch (dInstruction->instruction->operandTypes[operandNum]) {
 		case OPERAND_NONE:
 		case OPERAND_REGISTER_GHOST:
 			strOperand = NULL;
@@ -120,14 +120,14 @@ int formatDisassembledOperand(char **strOperand, int operandNum, const disassemb
 		case OPERAND_REGISTER_STARTR16:
 		case OPERAND_REGISTER_EVEN_PAIR_STARTR24:
 		case OPERAND_REGISTER_EVEN_PAIR:
-			retVal = asprintf(strOperand, "%s%d", OPERAND_PREFIX_REGISTER, dInstruction.operands[operandNum]);
+			retVal = asprintf(strOperand, "%s%d", OPERAND_PREFIX_REGISTER, dInstruction->operands[operandNum]);
 			break;
 		case OPERAND_DATA:
 		case OPERAND_COMPLEMENTED_DATA:
 			if (fOptions.options & FORMAT_OPTION_DATA_BIN) {
 				int i;
 				for (i = 7; i >= 0; i--) {
-					if (dInstruction.operands[operandNum] & (1<<i))
+					if (dInstruction->operands[operandNum] & (1<<i))
 						binary[7-i] = '1';
 					else
 						binary[7-i] = '0';
@@ -135,28 +135,28 @@ int formatDisassembledOperand(char **strOperand, int operandNum, const disassemb
 				binary[8] = '\0'; 
 				retVal = asprintf(strOperand, "%s%s", OPERAND_PREFIX_DATA_BIN, binary);
 			} else if (fOptions.options & FORMAT_OPTION_DATA_DEC) {
-				retVal = asprintf(strOperand, "%s%d", OPERAND_PREFIX_DATA_DEC, dInstruction.operands[operandNum]);
+				retVal = asprintf(strOperand, "%s%d", OPERAND_PREFIX_DATA_DEC, dInstruction->operands[operandNum]);
 			} else {
-				retVal = asprintf(strOperand, "%s%02X", OPERAND_PREFIX_DATA_HEX, dInstruction.operands[operandNum]);
+				retVal = asprintf(strOperand, "%s%02X", OPERAND_PREFIX_DATA_HEX, dInstruction->operands[operandNum]);
 			}
 			break;
 		case OPERAND_BIT:
-			retVal = asprintf(strOperand, "%s%d", OPERAND_PREFIX_BIT, dInstruction.operands[operandNum]);
+			retVal = asprintf(strOperand, "%s%d", OPERAND_PREFIX_BIT, dInstruction->operands[operandNum]);
 			break;
 		case OPERAND_BRANCH_ADDRESS:
 		case OPERAND_RELATIVE_ADDRESS:
 			/* If we have an address label, print it, otherwise just print the
 			 * relative distance to the destination address. */
 			if ((fOptions.options & FORMAT_OPTION_ADDRESS_LABEL) && fOptions.addressLabelPrefix != NULL) { 
-				retVal = asprintf(strOperand, "%s%0*X", fOptions.addressLabelPrefix, fOptions.addressFieldWidth, dInstruction.address+dInstruction.operands[operandNum]+2);
+				retVal = asprintf(strOperand, "%s%0*X", fOptions.addressLabelPrefix, fOptions.addressFieldWidth, dInstruction->address+dInstruction->operands[operandNum]+2);
 			} else {
 				/* Check if the operand is greater than 0 so we can print the + sign. */
-				if (dInstruction.operands[operandNum] > 0) {
-					retVal = asprintf(strOperand, "%s+%d", OPERAND_PREFIX_BRANCH_ADDRESS, dInstruction.operands[operandNum]);
+				if (dInstruction->operands[operandNum] > 0) {
+					retVal = asprintf(strOperand, "%s+%d", OPERAND_PREFIX_BRANCH_ADDRESS, dInstruction->operands[operandNum]);
 				} else {
 				/* Since the operand variable is signed, the negativeness of the distance
 				 * to the destination address has been taken care of in disassembleOperands() */
-					retVal = asprintf(strOperand, "%s%d", OPERAND_PREFIX_BRANCH_ADDRESS, dInstruction.operands[operandNum]);
+					retVal = asprintf(strOperand, "%s%d", OPERAND_PREFIX_BRANCH_ADDRESS, dInstruction->operands[operandNum]);
 				}
 			}
 			break;
@@ -164,20 +164,20 @@ int formatDisassembledOperand(char **strOperand, int operandNum, const disassemb
 			retVal = asprintf(strOperand, "%s%0*X", OPERAND_PREFIX_ABSOLUTE_ADDRESS, fOptions.addressFieldWidth, AVR_Long_Instruction_Data);
 			break;
 		case OPERAND_IO_REGISTER:
-			retVal = asprintf(strOperand, "%s%02X", OPERAND_PREFIX_IO_REGISTER, dInstruction.operands[operandNum]);
+			retVal = asprintf(strOperand, "%s%02X", OPERAND_PREFIX_IO_REGISTER, dInstruction->operands[operandNum]);
 			break;	
 		case OPERAND_WORD_DATA:
-			retVal = asprintf(strOperand, "%s%0*X", OPERAND_PREFIX_WORD_DATA, fOptions.addressFieldWidth, dInstruction.operands[operandNum]);
+			retVal = asprintf(strOperand, "%s%0*X", OPERAND_PREFIX_WORD_DATA, fOptions.addressFieldWidth, dInstruction->operands[operandNum]);
 			break;
 		case OPERAND_DES_ROUND:
-			retVal = asprintf(strOperand, "%s%02X", OPERAND_PREFIX_WORD_DATA, dInstruction.operands[operandNum]);
+			retVal = asprintf(strOperand, "%s%02X", OPERAND_PREFIX_WORD_DATA, dInstruction->operands[operandNum]);
 			break;
 
 		case OPERAND_YPQ:
-			retVal = asprintf(strOperand, "Y+%d", dInstruction.operands[operandNum]);
+			retVal = asprintf(strOperand, "Y+%d", dInstruction->operands[operandNum]);
 			break;
 		case OPERAND_ZPQ:
-			retVal = asprintf(strOperand, "Z+%d", dInstruction.operands[operandNum]);
+			retVal = asprintf(strOperand, "Z+%d", dInstruction->operands[operandNum]);
 			break;
 		case OPERAND_X:
 			retVal = asprintf(strOperand, "X");

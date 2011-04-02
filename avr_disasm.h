@@ -90,7 +90,7 @@ struct _disassembledInstruction {
 typedef struct _disassembledInstruction disassembledInstruction;
 
 /* Disassembles an assembled instruction, including its operands. */
-int disassembleInstruction(disassembledInstruction *dInstruction, const assembledInstruction aInstruction);
+int disassembleInstruction(disassembledInstruction *dInstruction, const assembledInstruction *aInstruction);
 
 #endif
 

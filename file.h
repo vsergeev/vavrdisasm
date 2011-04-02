@@ -49,6 +49,6 @@ int disassembleSRecordFile(FILE *fileOut, FILE *fileIn, formattingOptions fOptio
 
 /* Disassemble an assembled instruction, and print its disassembly
  * to fileOut. Alert user of errors. */
-int disassembleAndPrint(FILE *fileOut, const assembledInstruction aInstruction, formattingOptions fOptions);
+int disassembleAndPrint(FILE *fileOut, const assembledInstruction *aInstruction, formattingOptions fOptions);
 
 #endif

@@ -79,6 +79,6 @@ typedef struct _formattingOptions formattingOptions;
 
 
 /* Prints a disassembled instruction, formatted with options set in the formattingOptions structure. */
-int printDisassembledInstruction(FILE *out, const disassembledInstruction dInstruction, formattingOptions fOptions);
+int printDisassembledInstruction(FILE *out, const disassembledInstruction *dInstruction, formattingOptions fOptions);
 
 #endif

@@ -66,7 +66,7 @@ int disassembleGenericFile(FILE *fileOut, FILE *fileIn, formattingOptions fOptio
 		aInstruction.address = arec.address*2;
 		aInstruction.opcode = arec.data;
 
-		retVal = disassembleAndPrint(fileOut, aInstruction, fOptions);
+		retVal = disassembleAndPrint(fileOut, &aInstruction, fOptions);
 		if (retVal < 0)
 			return retVal;
 	}
@@ -146,7 +146,7 @@ int disassembleIHexFile(FILE *fileOut, FILE *fileIn, formattingOptions fOptions)
 				i--;
 			}
 	
-			retVal = disassembleAndPrint(fileOut, aInstruction, fOptions);
+			retVal = disassembleAndPrint(fileOut, &aInstruction, fOptions);
 			if (retVal < 0)
 				return retVal;
 			/* Increment the address by two for the correct address
@@ -229,7 +229,7 @@ int disassembleSRecordFile(FILE *fileOut, FILE *fileIn, formattingOptions fOptio
 				i--;
 			}
 	
-			retVal = disassembleAndPrint(fileOut, aInstruction, fOptions);
+			retVal = disassembleAndPrint(fileOut, &aInstruction, fOptions);
 			if (retVal < 0)
 				return retVal;
 			/* Increment the address by two for the correct address
@@ -245,7 +245,7 @@ static int currentAddress = -5;
 
 /* Disassemble an assembled instruction, and print its disassembly
  * to fileOut. Alert user of errors. */
-int disassembleAndPrint(FILE *fileOut, const assembledInstruction aInstruction, formattingOptions fOptions) {
+int disassembleAndPrint(FILE *fileOut, const assembledInstruction *aInstruction, formattingOptions fOptions) {
 	disassembledInstruction dInstruction;
 	int retVal;
 
@@ -257,8 +257,8 @@ int disassembleAndPrint(FILE *fileOut, const assembledInstruction aInstruction, 
 		 * currentAddress is initialized to -5), or the current address isn't consistent with
 		 * the address of the next disassembled instruction, we need to mark a new program origin
 		 * with the .org directive. */
-		if (currentAddress < 0 || currentAddress != aInstruction.address) {
-			currentAddress = aInstruction.address;
+		if (currentAddress < 0 || currentAddress != aInstruction->address) {
+			currentAddress = aInstruction->address;
 			fprintf(fileOut, "\n.org 0x%0*X\n", fOptions.addressFieldWidth, currentAddress/2);
 		}
 	}
@@ -274,7 +274,7 @@ int disassembleAndPrint(FILE *fileOut, const assembledInstruction aInstruction, 
 	}
 			
 	/* Next print the disassembled instruction, check for errors. */
-	retVal = printDisassembledInstruction(fileOut, dInstruction, fOptions);
+	retVal = printDisassembledInstruction(fileOut, &dInstruction, fOptions);
 	switch (retVal) {
 		case 0:
 			break;

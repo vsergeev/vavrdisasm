@@ -53,7 +53,7 @@ static int lookupInstruction(uint16_t opcode, int offset);
 
 
 /* Disassembles an assembled instruction, including its operands. */
-int disassembleInstruction(disassembledInstruction *dInstruction, const assembledInstruction aInstruction) {
+int disassembleInstruction(disassembledInstruction *dInstruction, const assembledInstruction *aInstruction) {
 	int instructionIndex, i;
 	
 	if (dInstruction == NULL)
@@ -64,7 +64,7 @@ int disassembleInstruction(disassembledInstruction *dInstruction, const assemble
 	 * extract the rest of the data, and indicate that it is to be printed */
 	if (AVR_Long_Instruction_State == AVR_LONG_INSTRUCTION_FOUND) {
 		AVR_Long_Instruction_State = AVR_LONG_INSTRUCTION_PRINT;
-		AVR_Long_Instruction_Data |= aInstruction.opcode;
+		AVR_Long_Instruction_Data |= aInstruction->opcode;
 		*dInstruction = dLongInstruction;
 		/* If the long instruction data operand is a long absolute address,
 		 * multiply it by two to refer to the correct address (since each
@@ -83,18 +83,18 @@ int disassembleInstruction(disassembledInstruction *dInstruction, const assemble
 	}
 	
 	/* Look up the instruction */
-	instructionIndex = lookupInstruction(aInstruction.opcode, 0);
+	instructionIndex = lookupInstruction(aInstruction->opcode, 0);
 
 	/* Copy over the address, and reference to the instruction, set
 	 * the equivilant-encoded but different instruction to NULL for now. */
-	dInstruction->address = aInstruction.address;
+	dInstruction->address = aInstruction->address;
 	dInstruction->instruction = &instructionSet[instructionIndex];
 	dInstruction->alternateInstruction = NULL;
 	
 	/* Copy out each operand, extracting the operand data from the original
 	 * opcode using the operand mask. */
 	for (i = 0; i < instructionSet[instructionIndex].numOperands; i++) {
-		dInstruction->operands[i] = extractDataFromMask(aInstruction.opcode, dInstruction->instruction->operandMasks[i]);
+		dInstruction->operands[i] = extractDataFromMask(aInstruction->opcode, dInstruction->instruction->operandMasks[i]);
 		/*** AVR SPECIFIC */
 		/* If this is an instruction with a long absolute operand, indicate that a long instruction has been found,
 		 * and extract the first part of the long address. */
