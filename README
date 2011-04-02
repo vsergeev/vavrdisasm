@@ -1,5 +1,5 @@
 README
-vAVRdisasm - Version 1.8 - 01/26/2011
+vAVRdisasm - Version 1.9 - 04/03/2011
 Vanya A. Sergeev - <vsergeev@gmail.com>
 ================================================================================
 Table of Contents
@@ -27,10 +27,12 @@ vAVRdisasm features a handful of formatting options, including:
  - Printing the instruction address alongside disassembly, enabled by default
  - Printing the destination address of relative branch/jump/call instructions
    as comments alongside disassembly, enabled by default
+ - Printing the original opcode data alongside disassembly
  - Ghetto Address Labels (see "Ghetto Address Labels" section)
  - Formatting data constants in different bases (hexadecimal, binary, decimal)
  - .DW data word directive for data not recognized as an instruction during
    disassembly. 
+ - Piped input and output
 
 vAVRdisasm should work on most *nix platforms, including a Cygwin or MinGW
 environment. vAVRdisasm was written by Vanya A. Sergeev, and tested with the
@@ -52,43 +54,53 @@ $ make
  in the vAVRdisasm project directory should compile vAVRdisasm on most
 *nix systems, including a Cygwin or MinGW environment. The Makefile is
 configured to use GCC to compile vAVRdisasm.
+
 vAVRdisasm should have no problem being compiled with "gmake".
 
 4. USING vAVRdisasm
 ================================================================================
-vAVRdisasm prints its disassembly output to stdout.
 
 * File Input:
-	For most purposes, just type
-	 $ ./vavrdisasm <AVR program file>
+	For most purposes:
+	 $ ./vavrdisasm <AVR program>
 	Example:
 	 $ ./vavrdisasm sampleprogram.hex
 
+	Use - for standard input.
+
+* Option -t or --file-type
 	vAVRdisasm will auto-recognize Atmel Generic, Intel HEX8, and Motorola 
-	S-Record files by their file extensions, but if it fails to do so, use 
-	the -t or --file-type option to specify the file format.
+	S-Record files by their first character. However, the -t or --file-type
+	option can be used to explicitly select the file format.
 	Example:
 	 $ ./vavrdisasm -t generic sampleprogram
 
-	The file type argument to the option can be "generic", "ihex", or 
+	The file type argument for this option can be "generic", "ihex", or 
 	"srecord" for Atmel Generic, Intel HEX8, or Motorola S-Record formatted 
 	files, respectively.
 
-* Options --data-base-...
-	vAVRdisasm will default to formatting data constants in base 
-	hexadecimal. However, data constants can be represented in a different 
-	base with one of the following options: --data-base-hex, 
-	--data-base-bin, and --data-base-dec.
+* Option -o or --out-file <output file>
+	This option can be used to specify an output file for writing instead
+	of the standard output. The output file - is also synonymous for
+	standard output.
 
-* Options --no-...
+* Options --data-base-hex, --data-base-bin, --data-base-dec
+	vAVRdisasm will default to formatting data constants in hexadecimal.
+	However, data constants can be represented in a different base with one
+	of the following options: --data-base-hex, --data-base-bin, and
+	--data-base-dec.
+
+* Options --no-addresses, --no-destination-comments.
 	By default, vAVRdisasm will print the instruction addresses alongside 
 	disassembly and destination comments for relative branch, jump, and call
 	instructions. These formatting options can be disabled with the 
 	--no-addresses and --no-destination-comments options.
 
-* Options -l or --address-label	
-	For usage information on the -l or --address-label option see the 
-	"Ghetto Address Labels" section.
+* Option --orig
+	Print the original opcode data to the left of the disassembly.
+
+* Option -l or --address-label	
+	See the "Ghetto Address Labels" section.
 
 * Options -h or --help, -v or --version
 	The -h or --help option will print a brief usage summary, including 
@@ -130,9 +142,7 @@ vAVRdisasm does not disassemble and display alternate versions of the same
 encoded instruction (i.e. showing "eor" in additon to "clr"). This technically
 means that the "cbr" instruction can never be displayed in the disassembly 
 because the "andi" instruction precedes it in priority.
-vAVRdisasm does not display the original opcode of the disassembled instruction.
-The original opcode can be convenient for some disassembled instructions that
-were actually meant to be data words (.DW).
+
 These features do not affect the accuracy of the disassembler's output, and 
 may be supported in future versions of vAVRdisasm.
 
@@ -148,12 +158,10 @@ Field width spacing of the addresses printed alongside disassembly, and the
 destination relative address comments can be customized in the ui.c
 source file.
 
-The output file (default is stdout) can be changed in ui.c source file.
-
 vAVRdisasm uses libGIS, a free Atmel Generic, Intel HEX, and Motorola S-Record
 Parser library to parse formatted files containing AVR program binaries. libGIS
 is available for free under both MIT and Public Domain licenses at:
-http://dev.frozeneskimo.com/software_projects:libgis
+http://dev.frozeneskimo.com/software_projects/libgis
 libGIS is compiled into vAVRdisasm--it does not need to be obtained separately. 
 
 8. Sample Disassembly Outputs
