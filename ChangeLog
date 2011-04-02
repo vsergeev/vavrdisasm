@@ -7,7 +7,8 @@ Release 1.9 - 04/02/2011
  - Improved Atmel Generic / Intel HEX8 / Motorola S-Record auto-detection by
    first character rather than file extension.
  - Thanks to Thomas for all four of the above fixes and suggestions!
- - Added printing of original opcode data alongside disassembly.
+ - Added printing of original opcode data alongside disassembly with
+   --original option.
 
 Release 1.8 - 01/26/2011
  - Fixed address decoding for LDS, STS, JMP, and CALL instructions.

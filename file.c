@@ -274,7 +274,7 @@ int disassembleAndPrint(FILE *fileOut, const assembledInstruction *aInstruction,
 	}
 			
 	/* Next print the disassembled instruction, check for errors. */
-	retVal = printDisassembledInstruction(fileOut, &dInstruction, fOptions);
+	retVal = printDisassembledInstruction(fileOut, aInstruction, &dInstruction, fOptions);
 	switch (retVal) {
 		case 0:
 			break;

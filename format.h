@@ -48,19 +48,25 @@
  * FORMAT_OPTION_ADDRESS_LABEL: creates address labels with the prefix set in the string addressLabelPrefix.
  * FORMAT_OPTION_ADDRESS: Prints the address of the instruction alongside the instruction (i.e. 1C inc R0 )
  * FORMAT_OPTION_DESTINATION_ADDRESS_COMMENT: Creates a comment after every relative branch/jump/call that
- *  includes the destination address of the instruction.
+ *  includes the destination address of the instruction
+ * FORMAT_OPTION_DATA_HEX: Represent data constants in hexadecimal
+ * FORMAT_OPTION_DATA_BIN: Represent data constants in binary
+ * FORMAT_OPTION_DATA_DEC: Represent data constants in decimal
+ * FORMAT_OPTION_ORIGINAL_OPCODE: Print original opcodes alongside disassembly
  */
 enum AVR_Formatting_Options {
-	FORMAT_OPTION_ADDRESS_LABEL = 1,
-	FORMAT_OPTION_ADDRESS = 2,
-	FORMAT_OPTION_DESTINATION_ADDRESS_COMMENT = 4,
-	FORMAT_OPTION_DATA_HEX = 8,
-	FORMAT_OPTION_DATA_BIN = 16,
-	FORMAT_OPTION_DATA_DEC = 32,
+	FORMAT_OPTION_ADDRESS_LABEL 			= (1<<0),
+	FORMAT_OPTION_ADDRESS 				= (1<<1),
+	FORMAT_OPTION_DESTINATION_ADDRESS_COMMENT 	= (1<<2),
+	FORMAT_OPTION_DATA_HEX 				= (1<<3),
+	FORMAT_OPTION_DATA_BIN 				= (1<<4),
+	FORMAT_OPTION_DATA_DEC 				= (1<<5),
+	FORMAT_OPTION_ORIGINAL_OPCODE			= (1<<6),
 };
 
 /* See avr_disasm.c for more information on these variables. */
 extern int AVR_Long_Instruction_State;
+extern uint16_t AVR_Long_Instruction_Opcode;
 extern uint32_t AVR_Long_Instruction_Data;
 
 /* Structure to hold various formatting options supported
@@ -79,6 +85,6 @@ typedef struct _formattingOptions formattingOptions;
 
 
 /* Prints a disassembled instruction, formatted with options set in the formattingOptions structure. */
-int printDisassembledInstruction(FILE *out, const disassembledInstruction *dInstruction, formattingOptions fOptions);
+int printDisassembledInstruction(FILE *out, const assembledInstruction *aInstruction, const disassembledInstruction *dInstruction, formattingOptions fOptions);
 
 #endif

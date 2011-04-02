@@ -37,9 +37,11 @@ static int formatDisassembledOperand(char **strOperand, int operandNum, const di
 
 
 /* Prints a disassembled instruction, formatted with options set in the formattingOptions structure. */
-int printDisassembledInstruction(FILE *out, const disassembledInstruction *dInstruction, formattingOptions fOptions) {
+int printDisassembledInstruction(FILE *out, const assembledInstruction *aInstruction, const disassembledInstruction *dInstruction, formattingOptions fOptions) {
 	int retVal, i;
 	char *strOperand;
+
+	retVal = 0;
 	
 	/* If we just found a long instruction, there is nothing to be printed yet, since we don't
 	 * have the entire long address ready yet. */
@@ -50,12 +52,30 @@ int printDisassembledInstruction(FILE *out, const disassembledInstruction *dInst
 	 * string addressLabelPrefix, because labels need to start with non-numerical character
 	 * for best compatibility with AVR assemblers. */	
 	if (fOptions.options & FORMAT_OPTION_ADDRESS_LABEL) 
-		retVal = fprintf(out, "%s%0*X: %s ", fOptions.addressLabelPrefix, fOptions.addressFieldWidth, dInstruction->address, dInstruction->instruction->mnemonic);
-	/* Just print the address that the instruction is located at, without address labels. */
+		retVal = fprintf(out, "%s%0*X: ", fOptions.addressLabelPrefix, fOptions.addressFieldWidth, dInstruction->address);
+	/* Otherwise just print the address, without address labels. */
 	else if (fOptions.options & FORMAT_OPTION_ADDRESS) 
-		retVal = fprintf(out, "%4X:\t%s ", dInstruction->address, dInstruction->instruction->mnemonic);
-	else 
-		retVal = fprintf(out, "%s ", dInstruction->instruction->mnemonic);
+		retVal = fprintf(out, "%X:\t", dInstruction->address);
+
+	if (retVal < 0)
+		return ERROR_FILE_WRITING_ERROR;
+
+	/* If original opcode printing is enabled and address labels are disabled, print the original opcode */
+	if (fOptions.options & FORMAT_OPTION_ORIGINAL_OPCODE && !(fOptions.options & FORMAT_OPTION_ADDRESS_LABEL)) {
+		/* First opcode for a long instruction was the previous aInstruction->opcode, which
+		 * this function skipped (see == AVR_LONG_INSTRUCTION_FOUND above), but we have saved
+		 *d in AVR_Long_Instruction_Opcode */
+		if (AVR_Long_Instruction_State == AVR_LONG_INSTRUCTION_PRINT)
+			retVal = fprintf(out, "%04X\t", AVR_Long_Instruction_Opcode);
+		else
+			retVal = fprintf(out, "%04X\t", aInstruction->opcode);
+	}
+
+	if (retVal < 0)
+		return ERROR_FILE_WRITING_ERROR;
+
+	/* Print the instruction mnemonic */
+	retVal = fprintf(out, "%s ", dInstruction->instruction->mnemonic);
 
 	if (retVal < 0)
 		return ERROR_FILE_WRITING_ERROR;
@@ -97,6 +117,23 @@ int printDisassembledInstruction(FILE *out, const disassembledInstruction *dInst
 	}
 	
 	fprintf(out, "\n");
+	
+	/* If original opcode printing is enabled and address labeled are disabled, print the second half of an
+	 * AVR long instruction if we are on one. */
+	if (fOptions.options & FORMAT_OPTION_ORIGINAL_OPCODE && !(fOptions.options & FORMAT_OPTION_ADDRESS_LABEL)) {
+		/* Second opcode of an AVR_Long_Instruction is in the current aInstruction->opcode */
+		if (AVR_Long_Instruction_State == AVR_LONG_INSTRUCTION_PRINT) {
+			/* Print a nice address label if we have them enabled */
+			if (fOptions.options & FORMAT_OPTION_ADDRESS) {
+				if (fprintf(out, "%X:\t", aInstruction->address) < 0)
+					return ERROR_FILE_WRITING_ERROR;
+			}
+
+			if (fprintf(out, "%04X\n", aInstruction->opcode) < 0)
+				return ERROR_FILE_WRITING_ERROR;
+		}
+	}
+
 	return 0;
 }
 

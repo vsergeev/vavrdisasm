@@ -33,6 +33,7 @@
 /* Flags for some long options that don't have a short option equivilant */
 static int no_addresses = 0;			/* Flag for --no-addresses */
 static int no_destination_comments = 0;		/* Flag for --no-destination-comments */
+static int original_opcode = 0;			/* Flag for --original */
 static int data_base = 0;			/* Base of data constants (hexadecimal, binary, decimal) */
 
 static struct option long_options[] = {
@@ -42,6 +43,7 @@ static struct option long_options[] = {
 	{"data-base-hex", no_argument, &data_base, FORMAT_OPTION_DATA_HEX},
 	{"data-base-bin", no_argument, &data_base, FORMAT_OPTION_DATA_BIN},
 	{"data-base-dec", no_argument, &data_base, FORMAT_OPTION_DATA_DEC},
+	{"original", no_argument, &original_opcode, 1}, 
 	{"no-addresses", no_argument, &no_addresses, 1},
 	{"no-destination-comments", no_argument, &no_destination_comments, 1},
 	{"help", no_argument, NULL, 'h'},
@@ -58,6 +60,8 @@ static void printUsage(FILE *stream, const char *programName) {
   -t, --file-type <type>	Specify the file type of the object file.\n\
   -l, --address-label <prefix> 	Create ghetto address labels with \n\
 				the specified label prefix.\n\
+  --original			Print original opcode data alongside\n\
+				disassembly.\n\
   --data-base-hex		Represent data constants in hexadecimal\n\
 				(default).\n\
   --data-base-bin		Represent data constants in binary.\n\
@@ -137,6 +141,9 @@ int main (int argc, const char *argv[]) {
 		fOptions.options |= FORMAT_OPTION_DATA_DEC;
 	else
 		fOptions.options |= FORMAT_OPTION_DATA_HEX;
+
+	if (original_opcode)
+		fOptions.options |= FORMAT_OPTION_ORIGINAL_OPCODE;
 
 	if (fileOut == NULL) {
 		perror("Error: Cannot open output file for writing");

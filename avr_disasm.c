@@ -35,6 +35,8 @@ extern instructionInfo instructionSet[AVR_TOTAL_INSTRUCTIONS];
  * way to get this special case (32-bit opcode) taken care of. */
 /* Variable to keep track of long instructions that have been found and are to be printed. */
 int AVR_Long_Instruction_State = 0;
+/* Variable to hold the first opcode of the long instruction */
+uint16_t AVR_Long_Instruction_Opcode;
 /* Variable to hold the data of the long instruction */
 uint32_t AVR_Long_Instruction_Data;
 /* A copy of the AVR long instruction, we need to keep this so we know information about the
@@ -114,6 +116,8 @@ int disassembleInstruction(disassembledInstruction *dInstruction, const assemble
 		 * Copy this instruction over to our special dLongInstruction variable, that
 		 * will exist even after we move onto the next 16-bits */
 		dLongInstruction = *dInstruction;
+		/* Also make a copy of the original opcode */
+		AVR_Long_Instruction_Opcode = aInstruction->opcode;
 	}
 
 	return 0;

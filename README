@@ -90,14 +90,16 @@ vAVRdisasm should have no problem being compiled with "gmake".
 	of the following options: --data-base-hex, --data-base-bin, and
 	--data-base-dec.
 
+* Option --original
+	Print the original opcode data to the left of the disassembly.
+	Note: does nothing if address labels are enabled (to ensure
+	assemble-able code).
+
 * Options --no-addresses, --no-destination-comments.
 	By default, vAVRdisasm will print the instruction addresses alongside 
 	disassembly and destination comments for relative branch, jump, and call
 	instructions. These formatting options can be disabled with the 
 	--no-addresses and --no-destination-comments options.
-
-* Option --orig
-	Print the original opcode data to the left of the disassembly.
 
 * Option -l or --address-label	
 	See the "Ghetto Address Labels" section.
