@@ -64,11 +64,11 @@ int printDisassembledInstruction(FILE *out, const assembledInstruction *aInstruc
 	if (fOptions.options & FORMAT_OPTION_ORIGINAL_OPCODE && !(fOptions.options & FORMAT_OPTION_ADDRESS_LABEL)) {
 		/* First opcode for a long instruction was the previous aInstruction->opcode, which
 		 * this function skipped (see == AVR_LONG_INSTRUCTION_FOUND above), but we have saved
-		 *d in AVR_Long_Instruction_Opcode */
+		 * in AVR_Long_Instruction_Opcode */
 		if (AVR_Long_Instruction_State == AVR_LONG_INSTRUCTION_PRINT)
-			retVal = fprintf(out, "%04X\t", AVR_Long_Instruction_Opcode);
+			retVal = fprintf(out, "%02X %02X %02X %02X\t", (AVR_Long_Instruction_Opcode >> 8) & 0xFF, AVR_Long_Instruction_Opcode & 0xFF, (aInstruction->opcode >> 8) & 0xFF, aInstruction->opcode & 0xFF);
 		else
-			retVal = fprintf(out, "%04X\t", aInstruction->opcode);
+			retVal = fprintf(out, "%02X %02X\t\t", (aInstruction->opcode >> 8) & 0xFF, aInstruction->opcode & 0xFF);
 	}
 
 	if (retVal < 0)
@@ -117,7 +117,8 @@ int printDisassembledInstruction(FILE *out, const assembledInstruction *aInstruc
 	}
 	
 	fprintf(out, "\n");
-	
+
+#if 0	
 	/* If original opcode printing is enabled and address labeled are disabled, print the second half of an
 	 * AVR long instruction if we are on one. */
 	if (fOptions.options & FORMAT_OPTION_ORIGINAL_OPCODE && !(fOptions.options & FORMAT_OPTION_ADDRESS_LABEL)) {
@@ -133,6 +134,7 @@ int printDisassembledInstruction(FILE *out, const assembledInstruction *aInstruc
 				return ERROR_FILE_WRITING_ERROR;
 		}
 	}
+#endif
 
 	return 0;
 }
