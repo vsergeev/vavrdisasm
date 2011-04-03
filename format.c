@@ -64,7 +64,7 @@ int printDisassembledInstruction(FILE *out, const assembledInstruction *aInstruc
 	if (fOptions.options & FORMAT_OPTION_ORIGINAL_OPCODE && !(fOptions.options & FORMAT_OPTION_ADDRESS_LABEL)) {
 		/* First opcode for a long instruction was the previous aInstruction->opcode, which
 		 * this function skipped (see == AVR_LONG_INSTRUCTION_FOUND above), but we have saved
-		 * in AVR_Long_Instruction_Opcode */
+		 * it in AVR_Long_Instruction_Opcode */
 		if (AVR_Long_Instruction_State == AVR_LONG_INSTRUCTION_PRINT)
 			retVal = fprintf(out, "%02X %02X %02X %02X\t", (AVR_Long_Instruction_Opcode >> 8) & 0xFF, AVR_Long_Instruction_Opcode & 0xFF, (aInstruction->opcode >> 8) & 0xFF, aInstruction->opcode & 0xFF);
 		else
