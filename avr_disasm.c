@@ -26,7 +26,7 @@
 #include "avr_disasm.h"
 #include "errorcodes.h"
 
-/* AVR instructionSet is defined in avrinstructionset.c */
+/* AVR instructionSet is defined in avr_instructionset.c */
 extern instructionInfo instructionSet[AVR_TOTAL_INSTRUCTIONS];
 
 /* Ugly global state that is shared across format_disasm.c and avr_disasm.c. As much as
