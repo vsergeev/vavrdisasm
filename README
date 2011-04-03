@@ -62,7 +62,7 @@ vAVRdisasm should have no problem being compiled with "gmake".
 
 * File Input:
 	For most purposes:
-	 $ ./vavrdisasm <AVR program>
+	 $ ./vavrdisasm <AVR program file>
 	Example:
 	 $ ./vavrdisasm sampleprogram.hex
 
@@ -80,20 +80,19 @@ vAVRdisasm should have no problem being compiled with "gmake".
 	files, respectively.
 
 * Option -o or --out-file <output file>
-	This option can be used to specify an output file for writing instead
-	of the standard output. The output file - is also synonymous for
-	standard output.
+	Specify an output file for writing instead of the standard output. The
+	output file - is also synonymous for standard output.
+
+* Option --original
+	Print the original opcode data to the left of the disassembly.
+	Note: this option is ignored if address labels are enabled (to ensure
+	assemble-able code).
 
 * Options --data-base-hex, --data-base-bin, --data-base-dec
 	vAVRdisasm will default to formatting data constants in hexadecimal.
 	However, data constants can be represented in a different base with one
 	of the following options: --data-base-hex, --data-base-bin, and
 	--data-base-dec.
-
-* Option --original
-	Print the original opcode data to the left of the disassembly.
-	Note: does nothing if address labels are enabled (to ensure
-	assemble-able code).
 
 * Options --no-addresses, --no-destination-comments.
 	By default, vAVRdisasm will print the instruction addresses alongside 
@@ -110,7 +109,7 @@ vAVRdisasm should have no problem being compiled with "gmake".
 	The -v or --version option will print the program's version number.
 
 If you encounter any program bugs or problems, please notify the program
-author by email: Vanya A. Sergeev - <vsergeev@gmail.com>.
+author by email: Vanya A. Sergeev - vsergeev at gmail dot com.
 
 5. Ghetto Address Labels
 ================================================================================
@@ -130,13 +129,15 @@ relative branch, jump, and call distances with every modification to the
 disassembly.
 
 The -l or --address-label option overrides the default printing of the
-addresses alongside disassembly. Destination comments can still be used.
+addresses alongside disassembly. Destination comments can still be printed.
 
 Example:
 $ ./vavrdisasm -l "A_" sampleprogram.hex
-vAVRdisasm's disassembly will include address labels that will look like this
-A_0000:. For sample disassembly outputs by vAVRdisasm, see the
-"Sample Disassembly Outputs" section.
+vAVRdisasm's disassembly will include address labels that will look like this:
+A_0000:
+
+For sample disassembly outputs by vAVRdisasm, see the "Sample Disassembly
+Outputs" section.
 
 6. Shortcomings
 ================================================================================
@@ -179,6 +180,14 @@ $ ./vavrdisasm sampleprogram.hex
    6:   out $18, R16
    8:   dec R16
    A:   rjmp .-6        ; 0x6
+
+$ ./vavrdisasm --original sampleprogram.hex
+   0:	C0 00		rjmp .0 	; 0x2
+   2:	EF 0F		ser R16
+   4:	BB 07		out $17, R16
+   6:	BB 08		out $18, R16
+   8:	95 0A		dec R16
+   A:	CF FD		rjmp .-6 	; 0x6
 
 $ ./vavrdisasm --no-destination-comments sampleprogram.hex
    0:   rjmp .0
@@ -224,8 +233,8 @@ A_006: out $18, R16
 A_008: dec R16
 A_00A: rjmp A_006
 
-The program sample above is modified slightly to illustrate vAVRdisasm's ability
-to represent data constants in different bases.
+The above program sample was modified slightly to illustrate vAVRdisasm's
+ability to represent data constants in different bases:
 
 $ ./vavrdisasm --data-base-bin sampleprogram2.hex
    0:   rjmp .0         ; 0x2

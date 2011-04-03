@@ -55,7 +55,7 @@ int printDisassembledInstruction(FILE *out, const assembledInstruction *aInstruc
 		retVal = fprintf(out, "%s%0*X: ", fOptions.addressLabelPrefix, fOptions.addressFieldWidth, dInstruction->address);
 	/* Otherwise just print the address, without address labels. */
 	else if (fOptions.options & FORMAT_OPTION_ADDRESS) 
-		retVal = fprintf(out, "%X:\t", dInstruction->address);
+		retVal = fprintf(out, "%4X:\t", dInstruction->address);
 
 	if (retVal < 0)
 		return ERROR_FILE_WRITING_ERROR;
@@ -117,24 +117,6 @@ int printDisassembledInstruction(FILE *out, const assembledInstruction *aInstruc
 	}
 	
 	fprintf(out, "\n");
-
-#if 0	
-	/* If original opcode printing is enabled and address labeled are disabled, print the second half of an
-	 * AVR long instruction if we are on one. */
-	if (fOptions.options & FORMAT_OPTION_ORIGINAL_OPCODE && !(fOptions.options & FORMAT_OPTION_ADDRESS_LABEL)) {
-		/* Second opcode of an AVR_Long_Instruction is in the current aInstruction->opcode */
-		if (AVR_Long_Instruction_State == AVR_LONG_INSTRUCTION_PRINT) {
-			/* Print a nice address label if we have them enabled */
-			if (fOptions.options & FORMAT_OPTION_ADDRESS) {
-				if (fprintf(out, "%X:\t", aInstruction->address) < 0)
-					return ERROR_FILE_WRITING_ERROR;
-			}
-
-			if (fprintf(out, "%04X\n", aInstruction->opcode) < 0)
-				return ERROR_FILE_WRITING_ERROR;
-		}
-	}
-#endif
 
 	return 0;
 }

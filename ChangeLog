@@ -1,4 +1,4 @@
-Release 1.9 - 04/02/2011
+Release 1.9 - 04/03/2011
  - CRITICAL FIX: Fixed S-Record reading bug that was ignoring valid data
    records.
  - Added output file support by -o/--out-file <output file> option.
