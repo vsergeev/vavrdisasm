@@ -1,8 +1,8 @@
 ChangeLog
 
 Version 1.0.5 - 02/05/2011
-	* Interface change!: write, print, and checksum functions now take a pointer to the record structure rather than a copy, for more efficient use of memory.
-	* Prettier debug printing of Intel HEX8 and SRecord records
+	* Interface change!: write, print, and checksum functions now take a pointer to the record structure instead of a copy, for more efficient use of memory.
+	* Prettier debug printing of Intel HEX8 and Motorola S-Record records
 	* Clean up of some of the source code comments and doxygen descriptions
 
 Version 1.0.4 - 07/08/2010
@@ -29,12 +29,12 @@ libGIS isn't really a library you link with, it's more of a collection of utilit
 
 The reason I wrote libGIS was because I wanted a clean, flexible, and easy-to-use set of functions to deal with the nasty parsing of the formatted binary files. libGIS supports Intel HEX8 and Motorola S-Record formatted files, which are undoubtedly the most popular in use with embedded systems. libGIS also supports the Atmel Generic binary format.
 
-libGIS is very convenient for disassembler, assembler, binary file converter, and other related projects. It is written in C (tested with gcc), but can also be compiled with a C++ compiler (such as g++), which means it can be implemented in any C/C++ projects requiring parsing of such formatted files. libGIS uses standard C libraries for its backend.
+libGIS is very convenient for disassembler, assembler, binary file converter, and other related projects. It is written in C (tested with gcc), but can also be compiled with a C++ compiler (such as g++), which means it can be implemented in any C/C++ projects requiring parsing of such formatted files. libGIS uses the standard C library in its backend.
 
 libGIS is clean and tiny. Each file format is supported with two files, one is the C source code and the other is the C header file, which makes compiling whichever format you need to support very easy. The interface to the utility functions is very straight forward. as demonstrated by the included testGIS.c program.
 The code of each file format parser has a structure to store record information and 4-5 basic functions to create, read, write, print, and checksum (for Intel HEX8 and Motorola S-Record) records. The error handling in libGIS will never leave you out of the dark, as the possible error codes and what they mean are clearly defined in the header file of the format parser you're using.
 
-Remember that libGIS is a low-level interface to the formatted files, and it will not automatically generate, for example, extended addresses in the Intel HEX8 format, or the header record in the S-Record format. libGIS helps in the actual writing and reading of the raw records, not dealing with the content going into them (but still adhering to the record and field size specifications). Perhaps in a future release I'll provide built-in support for making the extended address records and similar special records easier, but for now libGIS will be very simple, clean, flexible, and adaptable to any project.
+Remember that libGIS is a low-level interface to formatted binary files, and it will not automatically generate, for example, extended addresses in the Intel HEX8 format, or the header record in the S-Record format. libGIS helps in the actual writing and reading of the raw records, not dealing with the content going into them (but still adhering to the record and field size specifications). Perhaps in a future release I'll provide built-in support for making the extended address records and similar special records easier, but for now libGIS will be very simple, clean, flexible, and adaptable to any project.
 
 libGIS is offered with two licensing options. The first is Public Domain, which is free for any kind of use (personal or commercial), without warranty of any kind, and no requirement for attribution. The second is MIT/X11.
 
