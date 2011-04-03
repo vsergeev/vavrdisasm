@@ -1,0 +1,75 @@
+Program flow of vAVRdisasm and vPICdisasm,
+for those interested in the internals.
+
+================================================================================
+
+In a nutshell:
+
+-> main() 
+	-> disassembleFile()
+		read raw opcodes and loop {
+			-> disassembleAndPrint()
+				-> disassembleInstruction()
+				-> printDisassembledInstruction()
+		}
+
+Key structures are described in avr_disasm.h / pic_disasm.h
+
+================================================================================
+
+ui.c:
+
+int main(int argc, const char **argv) {
+	function pointer disassembleFile
+
+	option and argument parsing
+
+	disassembleFile = 	disassembleGenericFile	or
+				disassembleIHexFile	or
+				disassembleSRecordFile	
+
+	disassembleFile(fileOut, fileIn, fOptions);
+}
+
+================================================================================
+
+file.c:
+
+int disassembleXXXFile(FILE *fileOut, FILE *fileIn, formattingOptions fOptions) {
+	assembledInstruction aInstruction;
+
+	while (...) {
+		read raw opcode into aInstruction
+
+		disassembleAndPrint(fileOut, &aInstruction, fOptions);
+	}
+}
+
+int disassembleAndPrint(FILE *fileOut, const assembledInstruction *aInstruction, formattingOptions fOptions) {
+	disassembledInstruction dInstruction;
+
+	disassembleIntruction(&dInstruction, &aInstruction);
+	printDisassembledInstruction(fileOut, aInstruction, &dInstruction, fOptions);
+}
+
+================================================================================
+
+avr_disasm.c / pic_disasm.c:
+
+/* Instruction Set Table defined in avr_instructionset.c / pic_instructionset.c */
+extern instructionInfo instructionSet[AVR_TOTAL_INSTRUCTIONS];
+
+int disassembleInstruction(disassembledInstruction *dInstruction, const assembledInstruction *aInstruction) {
+	do the disassembly
+}
+
+================================================================================
+
+format.c:
+
+int printDisassembledInstruction(FILE *out, const assembledInstruction *aInstruction, const disassembledInstruction *dInstruction, formattingOptions fOptions) {
+	print aInstruction & dInstruction with the various formatting options
+}
+
+================================================================================
+
