@@ -154,7 +154,8 @@ int main(int argc, const char *argv[]) {
 	if (optind == argc) {
 		fprintf(stderr, "Error: No program file specified! Use - for standard input.\n\n");
 		printUsage(stderr, argv[0]);
-		fclose(fileOut);
+		if (fileOut != stdout)
+			fclose(fileOut);
 		exit(EXIT_FAILURE);
 	}
 
@@ -165,7 +166,8 @@ int main(int argc, const char *argv[]) {
 		fileIn = fopen(argv[optind], "r");
 		if (fileIn == NULL) {
 			perror("Error: Cannot open program file for disassembly");
-			fclose(fileOut);
+			if (fileOut != stdout)
+				fclose(fileOut);
 			exit(EXIT_FAILURE);
 		}
 	}
@@ -186,8 +188,10 @@ int main(int argc, const char *argv[]) {
 		else {
 			fprintf(stderr, "Unable to auto-recognize file type by first character.\n");
 			fprintf(stderr, "Please specify file type with -t,--file-type option.\n");
-			fclose(fileOut);	
-			fclose(fileIn);
+			if (fileOut != stdout)
+				fclose(fileOut);
+			if (fileIn != stdin)
+				fclose(fileIn);
 			exit(EXIT_FAILURE);
 		}
 		ungetc(c, fileIn);
@@ -205,15 +209,19 @@ int main(int argc, const char *argv[]) {
 		else
 			fprintf(stderr, "Unspecified file type.\n");
 		fprintf(stderr, "See program help/usage for supported file types.\n");
-		fclose(fileOut);	
-		fclose(fileIn);
+		if (fileOut != stdout)
+			fclose(fileOut);
+		if (fileIn != stdin)
+			fclose(fileIn);
 		exit(EXIT_FAILURE);
 	}
 
 	disassembleFile(fileOut, fileIn, fOptions);
 
-	fclose(fileOut);	
-	fclose(fileIn);
+	if (fileOut != stdout)
+		fclose(fileOut);
+	if (fileIn != stdin)
+		fclose(fileIn);
 
 	exit(EXIT_SUCCESS);
 }
