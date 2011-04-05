@@ -31,7 +31,7 @@ vAVRdisasm features a handful of formatting options, including:
  - Ghetto Address Labels (see "Ghetto Address Labels" section)
  - Formatting data constants in different bases (hexadecimal, binary, decimal)
  - .DW data word directive for data not recognized as an instruction during
-   disassembly. 
+   disassembly
  - Piped input and output
 
 vAVRdisasm should work on most *nix platforms, including a Cygwin or MinGW
