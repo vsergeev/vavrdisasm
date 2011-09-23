@@ -19,7 +19,7 @@
  *
  * file.h - Header file to Routines to take care of Atmel Generic, Intel HEX, 
  *  and Motorola S-Record file disassembly. Interface to avr_disasm.c to and 
- *  format_disasm.c to swiftly disassemble and print an assembled instruction.
+ *  format.c to swiftly disassemble and print an assembled instruction.
  *
  */
  

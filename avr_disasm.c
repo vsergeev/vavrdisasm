@@ -29,7 +29,7 @@
 /* AVR instructionSet is defined in avr_instructionset.c */
 extern instructionInfo instructionSet[AVR_TOTAL_INSTRUCTIONS];
 
-/* Ugly global state that is shared across format_disasm.c and avr_disasm.c. As much as
+/* Ugly global state that is shared across format.c and avr_disasm.c. As much as
  * I didn't want to do it (and instead would have liked to find a clean & clever solution that
  * doesn't expose anything between the two interfaces), for now this was the quickest (and cleanest?)
  * way to get this special case (32-bit opcode) taken care of. */
@@ -69,7 +69,7 @@ int disassembleInstruction(disassembledInstruction *dInstruction, const assemble
 		AVR_Long_Instruction_Data |= aInstruction->opcode;
 		*dInstruction = dLongInstruction;
 		/* If the long instruction data operand is a long absolute address,
-		 * multiply it by two to refer to the correct address (since each
+		 * multiply it by two to refer to the correct BYTE address (since each
 		 * instruction is two bytes). */	
 		for (i = 0; i < dInstruction->instruction->numOperands; i++) {
 			if (dInstruction->instruction->operandTypes[i] == OPERAND_LONG_ABSOLUTE_ADDRESS) {

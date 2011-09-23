@@ -18,7 +18,7 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA. 
  *
  * file.c - Routines to take care of Atmel Generic, Intel HEX, and Motorola
- *  S-Record file disassembly. Interface to avr_disasm.c to and format_disasm.c
+ *  S-Record file disassembly. Interface to avr_disasm.c to and format.c
  *  to disassemble and print an assembled instruction.
  *
  */

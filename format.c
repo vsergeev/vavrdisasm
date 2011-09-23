@@ -182,7 +182,8 @@ int formatDisassembledOperand(char **strOperand, int operandNum, const disassemb
 			}
 			break;
 		case OPERAND_LONG_ABSOLUTE_ADDRESS:
-			retVal = asprintf(strOperand, "%s%0*X", OPERAND_PREFIX_ABSOLUTE_ADDRESS, fOptions.addressFieldWidth, AVR_Long_Instruction_Data);
+			/* Format the long absolute address as a WORD address */
+			retVal = asprintf(strOperand, "%s%0*X", OPERAND_PREFIX_ABSOLUTE_ADDRESS, fOptions.addressFieldWidth, AVR_Long_Instruction_Data >> 1);
 			break;
 		case OPERAND_IO_REGISTER:
 			retVal = asprintf(strOperand, "%s%02X", OPERAND_PREFIX_IO_REGISTER, dInstruction->operands[operandNum]);
