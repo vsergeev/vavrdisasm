@@ -171,8 +171,8 @@ int formatDisassembledOperand(char **strOperand, int operandNum, const disassemb
 			if ((fOptions.options & FORMAT_OPTION_ADDRESS_LABEL) && fOptions.addressLabelPrefix != NULL) { 
 				retVal = asprintf(strOperand, "%s%0*X", fOptions.addressLabelPrefix, fOptions.addressFieldWidth, dInstruction->address+dInstruction->operands[operandNum]+2);
 			} else {
-				/* Check if the operand is greater than 0 so we can print the + sign. */
-				if (dInstruction->operands[operandNum] > 0) {
+				/* Check if the operand is greater than or equal to 0 so we can print the + sign. */
+				if (dInstruction->operands[operandNum] >= 0) {
 					retVal = asprintf(strOperand, "%s+%d", OPERAND_PREFIX_BRANCH_ADDRESS, dInstruction->operands[operandNum]);
 				} else {
 				/* Since the operand variable is signed, the negativeness of the distance
