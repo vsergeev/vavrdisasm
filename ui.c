@@ -79,7 +79,7 @@ static void printUsage(FILE *stream, const char *programName) {
 }
 
 static void printVersion(FILE *stream) {
-	fprintf(stream, "vAVRdisasm version 1.9 - 04/03/2011.\n");
+	fprintf(stream, "vAVRdisasm version 2.0 - 09/24/2011.\n");
 	fprintf(stream, "Written by Vanya Sergeev - <vsergeev@gmail.com>\n");
 }
 	

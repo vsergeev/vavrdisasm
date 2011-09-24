@@ -1,3 +1,12 @@
+Release 2.0 - 09/24/2011
+ - Changed address operand formatting for LDS, STS, JMP, and CALL instructions
+   from byte addreses to word addresses, to make vAVRdisasm's output compatible
+   with AVR assemblers.
+ - Fixed signed relative branch/jump decoding: jumps in the reverse direction
+   are now correctly decoded.
+ - Thanks to Graham Carnell for the above two fixes!
+ - Upgraded license from GPLv2 to GPLv3.
+
 Release 1.9 - 04/03/2011
  - CRITICAL FIX: Fixed S-Record reading bug that was ignoring valid data
    records.
