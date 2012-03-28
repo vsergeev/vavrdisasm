@@ -16,7 +16,7 @@
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  *
- * avr_disasm.h - Header file for AVR instruction disassembly into 
+ * avr_disasm.h - Header file for AVR instruction disassembly into
  *  disassembledInstruction structure.
  *
  */
@@ -75,7 +75,7 @@ typedef struct _assembledInstruction assembledInstruction;
 /* The disassembled/decoded instruction. */
 struct _disassembledInstruction {
 	uint32_t address;
-	/* A convenient pointer to the instructionSet, so we can refer 
+	/* A convenient pointer to the instructionSet, so we can refer
 	 * the general details of the instruction stored in there. */
 	instructionInfo *instruction;
 	/* Notice that operands can be signed!

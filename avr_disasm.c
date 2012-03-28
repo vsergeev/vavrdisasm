@@ -57,10 +57,10 @@ static int lookupInstruction(uint16_t opcode, int offset);
 /* Disassembles an assembled instruction, including its operands. */
 int disassembleInstruction(disassembledInstruction *dInstruction, const assembledInstruction *aInstruction) {
 	int instructionIndex, i;
-	
+
 	if (dInstruction == NULL)
 		return ERROR_INVALID_ARGUMENTS;
-	
+
 	/*** AVR SPECIFIC */
 	/* If a long instruction was found in the last instruction disassembly,
 	 * extract the rest of the data, and indicate that it is to be printed */
@@ -70,7 +70,7 @@ int disassembleInstruction(disassembledInstruction *dInstruction, const assemble
 		*dInstruction = dLongInstruction;
 		/* If the long instruction data operand is a long absolute address,
 		 * multiply it by two to refer to the correct BYTE address (since each
-		 * instruction is two bytes). */	
+		 * instruction is two bytes). */
 		for (i = 0; i < dInstruction->instruction->numOperands; i++) {
 			if (dInstruction->instruction->operandTypes[i] == OPERAND_LONG_ABSOLUTE_ADDRESS) {
 				AVR_Long_Instruction_Data <<= 1;
@@ -83,7 +83,7 @@ int disassembleInstruction(disassembledInstruction *dInstruction, const assemble
 	} else if (AVR_Long_Instruction_State == AVR_LONG_INSTRUCTION_PRINT) {
 		AVR_Long_Instruction_State = 0;
 	}
-	
+
 	/* Look up the instruction */
 	instructionIndex = lookupInstruction(aInstruction->opcode, 0);
 
@@ -92,7 +92,7 @@ int disassembleInstruction(disassembledInstruction *dInstruction, const assemble
 	dInstruction->address = aInstruction->address;
 	dInstruction->instruction = &instructionSet[instructionIndex];
 	dInstruction->alternateInstruction = NULL;
-	
+
 	/* Copy out each operand, extracting the operand data from the original
 	 * opcode using the operand mask. */
 	for (i = 0; i < instructionSet[instructionIndex].numOperands; i++) {
@@ -106,7 +106,7 @@ int disassembleInstruction(disassembledInstruction *dInstruction, const assemble
 			dLongInstruction = *dInstruction;
 		}
 	}
-	
+
 	/* Disassemble operands */
 	if (disassembleOperands(dInstruction) < 0)
 		return ERROR_INVALID_ARGUMENTS; /* Only possible error for disassembleOperands() */
@@ -127,7 +127,7 @@ int disassembleInstruction(disassembledInstruction *dInstruction, const assemble
 static uint16_t extractDataFromMask(uint16_t data, uint16_t mask) {
 	int i, j;
 	uint16_t result = 0;
-	
+
 	/* i counts through every bit of the data,
 	 * j counts through every bit of the data we're copying out. */
 	for (i = 0, j = 0; i < 16; i++) {
@@ -142,7 +142,7 @@ static uint16_t extractDataFromMask(uint16_t data, uint16_t mask) {
 			j++;
 		}
 	}
-	
+
 	return result;
 }
 
@@ -153,7 +153,7 @@ static uint16_t extractDataFromMask(uint16_t data, uint16_t mask) {
 static int lookupInstruction(uint16_t opcode, int offset) {
 	uint16_t opcodeSearch, operandTemp;
 	int instructionIndex, ghostRegisterConfirmed, i, j;
-	
+
 	for (instructionIndex = offset; instructionIndex < AVR_TOTAL_INSTRUCTIONS; instructionIndex++) {
 		opcodeSearch = opcode;
 		/* If we have a ghost register operand (OPERAND_REGISTER_GHOST),
@@ -162,8 +162,8 @@ static int lookupInstruction(uint16_t opcode, int offset) {
 		/* We want to mask out all of the operands. We don't count up to
 		 * instructionSet[instructionIndex].numOperands because some instructions,
 		 * such as clr R16, are actually encoded with two operands (so as eor R16,R16),
-		 * and we want to screen out both operands to get the most simplest form of 
-		 * the instruction. */ 
+		 * and we want to screen out both operands to get the most simplest form of
+		 * the instruction. */
 		for (i = 0; i < AVR_MAX_NUM_OPERANDS; i++) {
 			if (instructionSet[instructionIndex].operandTypes[i] == OPERAND_REGISTER_GHOST) {
 				/* Grab the first operand */
@@ -174,7 +174,7 @@ static int lookupInstruction(uint16_t opcode, int offset) {
 							operandTemp)
 						ghostRegisterConfirmed = 0;
 				}
-			} 
+			}
 			opcodeSearch &= ~(instructionSet[instructionIndex].operandMasks[i]);
 		}
 		/* If we encountered a ghost register and were unable confirm that
@@ -183,11 +183,11 @@ static int lookupInstruction(uint16_t opcode, int offset) {
 		if (ghostRegisterConfirmed == 0)
 			continue;
 
-		if (opcodeSearch == instructionSet[instructionIndex].opcodeMask) 
+		if (opcodeSearch == instructionSet[instructionIndex].opcodeMask)
 			break;
 	}
 	/* It's impossible not to find an instruction, because the last instruction ".DW",
-	 * specifies a word of data at the addresses, instead of an instruction. 
+	 * specifies a word of data at the addresses, instead of an instruction.
 	 * Its operand 2 mask, 0x0000, will set opcode search to 0x0000, and this will always
 	 * match with the opcodeMask of 0x0000. */
 	return instructionIndex;
@@ -196,13 +196,13 @@ static int lookupInstruction(uint16_t opcode, int offset) {
 /* Disassembles/decodes operands back to their original form. */
 static int disassembleOperands(disassembledInstruction *dInstruction) {
 	int i;
-	
+
 	/* This should never happen */
 	if (dInstruction == NULL)
 		return ERROR_INVALID_ARGUMENTS;
 	if (dInstruction->instruction == NULL)
 		return ERROR_INVALID_ARGUMENTS;
-	
+
 	/* For each operand, decode its original value. */
 	for (i = 0; i < dInstruction->instruction->numOperands; i++) {
 		switch (dInstruction->instruction->operandTypes[i]) {
@@ -218,7 +218,7 @@ static int disassembleOperands(disassembledInstruction *dInstruction) {
 				 * by two. */
 				/* Next, we check for the signed bit (MSB), which would indicate a
 				 * negative. If the number is signed, we would reverse the two's
-				 * complement (invert bits, add 1, and then only use the 7 bits that 
+				 * complement (invert bits, add 1, and then only use the 7 bits that
 				 * matter), otherwise, the number represents a positive distance and
 				 * no bit manipulation is necessary. */
 				dInstruction->operands[i] <<= 1;
@@ -243,7 +243,7 @@ static int disassembleOperands(disassembledInstruction *dInstruction) {
 				 * by two. */
 				/* Next, we check for the signed bit (MSB), which would indicate a
 				 * negative. If the number is signed, we would reverse the two's
-				 * complement (invert bits, add 1, and then only use the 12 bits that 
+				 * complement (invert bits, add 1, and then only use the 12 bits that
 				 * matter), otherwise, the number represents a positive distance and
 				 * no bit manipulation is necessary. */
 				dInstruction->operands[i] <<= 1;

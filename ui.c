@@ -18,7 +18,7 @@
  *
  * ui.c - Main user interface to AVR disassembler. Takes care of program
  *  arguments, setting disassembly formatting options, and program file
- *  type recognition. 
+ *  type recognition.
  *
  */
 
@@ -42,7 +42,7 @@ static struct option long_options[] = {
 	{"data-base-hex", no_argument, &data_base, FORMAT_OPTION_DATA_HEX},
 	{"data-base-bin", no_argument, &data_base, FORMAT_OPTION_DATA_BIN},
 	{"data-base-dec", no_argument, &data_base, FORMAT_OPTION_DATA_DEC},
-	{"original", no_argument, &original_opcode, 1}, 
+	{"original", no_argument, &original_opcode, 1},
 	{"no-addresses", no_argument, &no_addresses, 1},
 	{"no-destination-comments", no_argument, &no_destination_comments, 1},
 	{"help", no_argument, NULL, 'h'},
@@ -82,7 +82,7 @@ static void printVersion(FILE *stream) {
 	fprintf(stream, "vAVRdisasm version 2.0 - 09/24/2011.\n");
 	fprintf(stream, "Written by Vanya Sergeev - <vsergeev@gmail.com>\n");
 }
-	
+
 int main(int argc, const char *argv[]) {
 	int optc;
 	FILE *fileIn, *fileOut;
@@ -97,7 +97,7 @@ int main(int argc, const char *argv[]) {
 	/* Default output file to stdout */
 	fileOut = stdout;
 
-	fileType[0] = '\0';	
+	fileType[0] = '\0';
 	while (1) {
 		optc = getopt_long(argc, (char * const *)argv, "o:t:l:hv", long_options, NULL);
 		if (optc == -1)
@@ -119,7 +119,7 @@ int main(int argc, const char *argv[]) {
 				break;
 			case 'h':
 				printUsage(stderr, argv[0]);
-				exit(EXIT_SUCCESS);	
+				exit(EXIT_SUCCESS);
 			case 'v':
 				printVersion(stderr);
 				exit(EXIT_SUCCESS);
@@ -148,8 +148,8 @@ int main(int argc, const char *argv[]) {
 		perror("Error: Cannot open output file for writing");
 		exit(EXIT_FAILURE);
 	}
-	
-	/* If there are no more arguments left */	
+
+	/* If there are no more arguments left */
 	if (optind == argc) {
 		fprintf(stderr, "Error: No program file specified! Use - for standard input.\n\n");
 		printUsage(stderr, argv[0]);

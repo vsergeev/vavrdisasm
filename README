@@ -7,11 +7,12 @@ Table of Contents
 1. ABOUT vAVRdisasm
 2. LICENSE
 3. COMPILING vAVRdisasm
-4. USING vAVRdisasm
-5. Ghetto Address Labels
-6. Shortcomings
-7. Source Code
-8. Sample Disassembly Outputs  
+4. USAGE
+5. USING vAVRdisasm
+6. Ghetto Address Labels
+7. Shortcomings
+8. Source Code
+9. Sample Disassembly Outputs
 ================================================================================
 
 1. ABOUT vAVRdisasm
@@ -56,7 +57,39 @@ configured to use GCC to compile vAVRdisasm.
 
 vAVRdisasm should have no problem being compiled with "gmake".
 
-4. USING vAVRdisasm
+4. USAGE
+================================================================================
+
+Usage: ./vavrdisasm <option(s)> <file>
+ Disassembles AVR program file <file>. Use - for standard input.
+ Written by Vanya A. Sergeev - <vsergeev@gmail.com>.
+
+ Additional Options:
+  -o, --out-file <output file>	Write to output file instead of standard output.
+  -t, --file-type <type>	Specify the file type of the object file.
+  -l, --address-label <prefix> 	Create ghetto address labels with
+				the specified label prefix.
+  --original			Print original opcode data alongside
+				disassembly.
+  --data-base-hex		Represent data constants in hexadecimal
+				(default).
+  --data-base-bin		Represent data constants in binary.
+  --data-base-dec		Represent data constants in decimal.
+  --no-addresses		Do not display the address alongside
+				disassembly.
+  --no-destination-comments	Do not display the destination address
+				comments of relative branch/jump/call
+				instructions.
+  -h, --help			Display this usage/help.
+  -v, --version			Display the program's version.
+
+Supported file types:
+  Atmel Generic			generic
+  Intel HEX8 			ihex
+  Motorola S-Record 		srecord
+
+
+5. USING vAVRdisasm
 ================================================================================
 
 * File Input:
@@ -68,14 +101,14 @@ vAVRdisasm should have no problem being compiled with "gmake".
 	Use - for standard input.
 
 * Option -t or --file-type
-	vAVRdisasm will auto-recognize Atmel Generic, Intel HEX8, and Motorola 
+	vAVRdisasm will auto-recognize Atmel Generic, Intel HEX8, and Motorola
 	S-Record files by their first character. However, the -t or --file-type
 	option can be used to explicitly select the file format.
 	Example:
 	 $ ./vavrdisasm -t generic sampleprogram
 
-	The file type argument for this option can be "generic", "ihex", or 
-	"srecord" for Atmel Generic, Intel HEX8, or Motorola S-Record formatted 
+	The file type argument for this option can be "generic", "ihex", or
+	"srecord" for Atmel Generic, Intel HEX8, or Motorola S-Record formatted
 	files, respectively.
 
 * Option -o or --out-file <output file>
@@ -94,30 +127,30 @@ vAVRdisasm should have no problem being compiled with "gmake".
 	--data-base-dec.
 
 * Options --no-addresses, --no-destination-comments.
-	By default, vAVRdisasm will print the instruction addresses alongside 
+	By default, vAVRdisasm will print the instruction addresses alongside
 	disassembly and destination comments for relative branch, jump, and call
-	instructions. These formatting options can be disabled with the 
+	instructions. These formatting options can be disabled with the
 	--no-addresses and --no-destination-comments options.
 
-* Option -l or --address-label	
+* Option -l or --address-label
 	See the "Ghetto Address Labels" section.
 
 * Options -h or --help, -v or --version
-	The -h or --help option will print a brief usage summary, including 
+	The -h or --help option will print a brief usage summary, including
 	supported program options and file types.
 	The -v or --version option will print the program's version number.
 
 If you encounter any program bugs or problems, please notify the program
 author by email: Vanya A. Sergeev - vsergeev at gmail dot com.
 
-5. Ghetto Address Labels
+6. Ghetto Address Labels
 ================================================================================
-vAVRdisasm supports a unique formatting feature: Ghetto Address Labels, which 
+vAVRdisasm supports a unique formatting feature: Ghetto Address Labels, which
 few, if not any, single-pass disassemblers implement.
 
 With the -l or --address-label option and a supplied prefix, vAVRdisasm
-will print a label containing the ideally non-numerical supplied prefix 
-and the address of the disassembled instruction at every instruction. Also, 
+will print a label containing the ideally non-numerical supplied prefix
+and the address of the disassembled instruction at every instruction. Also,
 all relative branch, jump, and call instructions will be formatted to jump
 to their designated address label.
 
@@ -138,23 +171,23 @@ A_0000:
 For sample disassembly outputs by vAVRdisasm, see the "Sample Disassembly
 Outputs" section.
 
-6. Shortcomings
+7. Shortcomings
 ================================================================================
 vAVRdisasm does not disassemble and display alternate versions of the same
 encoded instruction (i.e. showing "eor" in additon to "clr"). This technically
-means that the "cbr" instruction can never be displayed in the disassembly 
+means that the "cbr" instruction can never be displayed in the disassembly
 because the "andi" instruction precedes it in priority.
 
-These features do not affect the accuracy of the disassembler's output, and 
+These features do not affect the accuracy of the disassembler's output, and
 may be supported in future versions of vAVRdisasm.
 
-7. Source Code
+8. Source Code
 ================================================================================
 vAVRdisasm's source code is heavily commented, because this disassembler was
 also a personal learning project of the author.
 
 Operand prefixes (such as "R" for register operands or "$" for data operands)
-can be customized in the format.h header file. 
+can be customized in the format.h header file.
 
 Field width spacing of the addresses printed alongside disassembly, and the
 destination relative address comments can be customized in the ui.c
@@ -164,15 +197,15 @@ vAVRdisasm uses libGIS, a free Atmel Generic, Intel HEX, and Motorola S-Record
 Parser library to parse formatted files containing AVR program binaries. libGIS
 is available for free under both MIT and Public Domain licenses at:
 http://dev.frozeneskimo.com/software_projects/libgis
-libGIS is compiled into vAVRdisasm--it does not need to be obtained separately. 
+libGIS is compiled into vAVRdisasm--it does not need to be obtained separately.
 
-8. Sample Disassembly Outputs
+9. Sample Disassembly Outputs
 ================================================================================
-These output samples, produced by vAVRdisasm, are a disassembly of the program 
+These output samples, produced by vAVRdisasm, are a disassembly of the program
 from the "Novice's Guide to AVR Development" article in the Atmel Applications
 Journal.
 
-$ ./vavrdisasm sampleprogram.hex 
+$ ./vavrdisasm sampleprogram.hex
    0:   rjmp .0         ; 0x2
    2:   ser R16
    4:   out $17, R16

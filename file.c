@@ -60,7 +60,7 @@ int disassembleGenericFile(FILE *fileOut, FILE *fileIn, formattingOptions fOptio
 				return ERROR_IRRECOVERABLE;
 		}
 
-		/* Address is multplied by two, because each 16-bit opcode 
+		/* Address is multplied by two, because each 16-bit opcode
 		 * takes two bytes. */
 		aInstruction.address = arec.address*2;
 		aInstruction.opcode = arec.data;
@@ -69,8 +69,8 @@ int disassembleGenericFile(FILE *fileOut, FILE *fileIn, formattingOptions fOptio
 		if (retVal < 0)
 			return retVal;
 	}
-	
-	return 0;		
+
+	return 0;
 }
 
 /* Reads a record from an Intel Hex formatted file, formats the assembled
@@ -113,7 +113,7 @@ int disassembleIHexFile(FILE *fileOut, FILE *fileIn, formattingOptions fOptions)
 			continue;
 
 		aInstruction.address = irec.address;
-		for (i = 0; i < irec.dataLen; i += 2) { 
+		for (i = 0; i < irec.dataLen; i += 2) {
 			/* Make sure there is a data byte after this,
 			 * (we need both because each opcode is 16-bits) */
 			if (i+1 >= irec.dataLen) {
@@ -128,7 +128,7 @@ int disassembleIHexFile(FILE *fileOut, FILE *fileIn, formattingOptions fOptions)
 					continue;
 				}
 			}
-			
+
 			if (dataFromPreviousOddRecordAvailable != 1) {
 				/* Assembled AVR program is stored in little-endian,
 				 * so the opcode is stored backwords. */
@@ -144,7 +144,7 @@ int disassembleIHexFile(FILE *fileOut, FILE *fileIn, formattingOptions fOptions)
 				/* Decrement the counter by one so the outside for loop counts correctly (it adds 2 to the counter each iteration) */
 				i--;
 			}
-	
+
 			retVal = disassembleAndPrint(fileOut, &aInstruction, fOptions);
 			if (retVal < 0)
 				return retVal;
@@ -153,8 +153,8 @@ int disassembleIHexFile(FILE *fileOut, FILE *fileIn, formattingOptions fOptions)
 			aInstruction.address += 2;
 		}
 	}
-	
-	return 0;		
+
+	return 0;
 }
 
 /* Reads a record from an Motorola S-Record formatted file, formats the assembled
@@ -196,7 +196,7 @@ int disassembleSRecordFile(FILE *fileOut, FILE *fileIn, formattingOptions fOptio
 			continue;
 
 		aInstruction.address = srec.address;
-		for (i = 0; i < srec.dataLen; i += 2) { 
+		for (i = 0; i < srec.dataLen; i += 2) {
 			/* Make sure there is a data byte after this,
 			 * (we need both because each opcode is 16-bits) */
 			if (i+1 >= srec.dataLen) {
@@ -211,7 +211,7 @@ int disassembleSRecordFile(FILE *fileOut, FILE *fileIn, formattingOptions fOptio
 					continue;
 				}
 			}
-			
+
 			if (dataFromPreviousOddRecordAvailable != 1) {
 				/* Assembled AVR program is stored in little-endian,
 				 * so the opcode is stored backwords. */
@@ -227,7 +227,7 @@ int disassembleSRecordFile(FILE *fileOut, FILE *fileIn, formattingOptions fOptio
 				/* Decrement the counter by one so the outside for loop counts correctly (it adds 2 to the counter each iteration) */
 				i--;
 			}
-	
+
 			retVal = disassembleAndPrint(fileOut, &aInstruction, fOptions);
 			if (retVal < 0)
 				return retVal;
@@ -236,7 +236,7 @@ int disassembleSRecordFile(FILE *fileOut, FILE *fileIn, formattingOptions fOptio
 			aInstruction.address += 2;
 		}
 	}
-	
+
 	return 0;
 }
 
@@ -271,7 +271,7 @@ int disassembleAndPrint(FILE *fileOut, const assembledInstruction *aInstruction,
 			fprintf(stderr, "Encountered an irrecoverable error during disassembly!\n");
 			return ERROR_IRRECOVERABLE;
 	}
-			
+
 	/* Next print the disassembled instruction, check for errors. */
 	retVal = printDisassembledInstruction(fileOut, aInstruction, &dInstruction, fOptions);
 	switch (retVal) {
@@ -287,7 +287,7 @@ int disassembleAndPrint(FILE *fileOut, const assembledInstruction *aInstruction,
 			fprintf(stderr, "Encountered an irrecoverable error during disassembly!\n");
 			return ERROR_IRRECOVERABLE;
 	}
-	
-	return 0;		
+
+	return 0;
 }
 

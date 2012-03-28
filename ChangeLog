@@ -32,7 +32,7 @@ Release 1.7 - 05/27/2010
 
 Release 1.6 - 02/04/2010
  - Fixed the number-of-operands field for the SPM instruction. This bug was
-   causing vAVRdisasm to crash as it was attempting to format a non-existing 
+   causing vAVRdisasm to crash as it was attempting to format a non-existing
    operand during disassembly.
  - Updated the README.
 
@@ -43,7 +43,7 @@ Release 1.5 - 08/25/2009
    0856H - 04/09.
 
 Release 1.4 - 06/27/2009
- - Fixed handling of newlines (sometimes found at the end of program files) so 
+ - Fixed handling of newlines (sometimes found at the end of program files) so
    an "invalid record" error doesn't appear when a newline is read.
  - CRITICAL FIX: Fixed reading and disassembly of odd byte length records in
    Intel HEX8 and Motorola S-Record files. Special thanks to Ahmed for
