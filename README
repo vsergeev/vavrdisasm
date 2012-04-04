@@ -60,7 +60,7 @@ vAVRdisasm should have no problem being compiled with "gmake".
 4. USAGE
 ================================================================================
 
-Usage: ./vavrdisasm <option(s)> <file>
+Usage: vavrdisasm <option(s)> <file>
  Disassembles AVR program file <file>. Use - for standard input.
  Written by Vanya A. Sergeev - <vsergeev@gmail.com>.
 
@@ -94,9 +94,9 @@ Supported file types:
 
 * File Input:
 	For most purposes:
-	 $ ./vavrdisasm <AVR program file>
+	 $ vavrdisasm <AVR program file>
 	Example:
-	 $ ./vavrdisasm sampleprogram.hex
+	 $ vavrdisasm sampleprogram.hex
 
 	Use - for standard input.
 
@@ -105,7 +105,7 @@ Supported file types:
 	S-Record files by their first character. However, the -t or --file-type
 	option can be used to explicitly select the file format.
 	Example:
-	 $ ./vavrdisasm -t generic sampleprogram
+	 $ vavrdisasm -t generic sampleprogram
 
 	The file type argument for this option can be "generic", "ihex", or
 	"srecord" for Atmel Generic, Intel HEX8, or Motorola S-Record formatted
@@ -164,7 +164,7 @@ The -l or --address-label option overrides the default printing of the
 addresses alongside disassembly. Destination comments can still be printed.
 
 Example:
-$ ./vavrdisasm -l "A_" sampleprogram.hex
+$ vavrdisasm -l "A_" sampleprogram.hex
 vAVRdisasm's disassembly will include address labels that will look like this:
 A_0000:
 
@@ -205,7 +205,7 @@ These output samples, produced by vAVRdisasm, are a disassembly of the program
 from the "Novice's Guide to AVR Development" article in the Atmel Applications
 Journal.
 
-$ ./vavrdisasm sampleprogram.hex
+$ vavrdisasm sampleprogram.hex
    0:   rjmp .0         ; 0x2
    2:   ser R16
    4:   out $17, R16
@@ -213,7 +213,7 @@ $ ./vavrdisasm sampleprogram.hex
    8:   dec R16
    A:   rjmp .-6        ; 0x6
 
-$ ./vavrdisasm --original sampleprogram.hex
+$ vavrdisasm --original sampleprogram.hex
    0:	C0 00		rjmp .0 	; 0x2
    2:	EF 0F		ser R16
    4:	BB 07		out $17, R16
@@ -221,7 +221,7 @@ $ ./vavrdisasm --original sampleprogram.hex
    8:	95 0A		dec R16
    A:	CF FD		rjmp .-6 	; 0x6
 
-$ ./vavrdisasm --no-destination-comments sampleprogram.hex
+$ vavrdisasm --no-destination-comments sampleprogram.hex
    0:   rjmp .0
    2:   ser R16
    4:   out $17, R16
@@ -229,7 +229,7 @@ $ ./vavrdisasm --no-destination-comments sampleprogram.hex
    8:   dec R16
    A:   rjmp .-6
 
-$ ./vavrdisasm --no-addresses sampleprogram.hex
+$ vavrdisasm --no-addresses sampleprogram.hex
 rjmp .0         ; 0x2
 ser R16
 out $17, R16
@@ -237,7 +237,7 @@ out $18, R16
 dec R16
 rjmp .-6        ; 0x6
 
-$ ./vavrdisasm --no-addresses --no-destination-comments sampleprogram.hex
+$ vavrdisasm --no-addresses --no-destination-comments sampleprogram.hex
 rjmp .0
 ser R16
 out $17, R16
@@ -245,7 +245,7 @@ out $18, R16
 dec R16
 rjmp .-6
 
-$ ./vavrdisasm -l "A_" sampleprogram.hex
+$ vavrdisasm -l "A_" sampleprogram.hex
 
 .org 0x000
 A_000: rjmp A_002       ; 0x2
@@ -255,7 +255,7 @@ A_006: out $18, R16
 A_008: dec R16
 A_00A: rjmp A_006       ; 0x6
 
-$ ./vavrdisasm -l "A_" --no-destination-comments sampleprogram.hex
+$ vavrdisasm -l "A_" --no-destination-comments sampleprogram.hex
 
 .org 0x000
 A_000: rjmp A_002
@@ -268,7 +268,7 @@ A_00A: rjmp A_006
 The above program sample was modified slightly to illustrate vAVRdisasm's
 ability to represent data constants in different bases:
 
-$ ./vavrdisasm --data-base-bin sampleprogram2.hex
+$ vavrdisasm --data-base-bin sampleprogram2.hex
    0:   rjmp .0         ; 0x2
    2:   ser R16
    4:   out $17, R16
