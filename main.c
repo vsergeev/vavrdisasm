@@ -45,7 +45,7 @@ char *format_prefixes_objdump[] = {
     [AVR_FORMAT_PREFIX_ADDRESS_LABEL]       = "A_", /* A_0010: ... */
     [AVR_FORMAT_PREFIX_ABSOLUTE_ADDRESS]    = "0x", /* call 0x1234 */
     [AVR_FORMAT_PREFIX_RELATIVE_ADDRESS]    = ".",  /* rjmp .4 */
-    [AVR_FORMAT_PREFIX_DES_ROUND]           = "0x", /* des 0x01 */
+    [AVR_FORMAT_PREFIX_DES_ROUND]           = "",   /* des 1 */
     [AVR_FORMAT_PREFIX_RAW_WORD]            = "0x", /* .dw 0xabcd */
     [AVR_FORMAT_PREFIX_RAW_BYTE]            = "0x", /* .db 0xab */
     };
@@ -273,7 +273,7 @@ int main(int argc, const char *argv[]) {
         format_flags |= AVR_FORMAT_FLAG_DATA_HEX;
 
     /* Set up formatting prefixes */
-    format_prefixes = format_prefixes_objdump;
+    format_prefixes = format_prefixes_avrasm;
 
     if (format_address_label[0] != '\0') {
         format_flags |= AVR_FORMAT_FLAG_ADDRESS_LABELS;

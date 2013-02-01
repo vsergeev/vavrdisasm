@@ -148,53 +148,53 @@ These output samples, produced by vAVRdisasm, are a disassembly of the program f
 
     $ vavrdisasm sampleprogram.hex
        0:   c0 00       rjmp    .+0 ; 0x2
-       2:   ef 0f       ser r16
-       4:   bb 07       out 0x17, r16
-       6:   bb 08       out 0x18, r16
-       8:   95 0a       dec r16
+       2:   ef 0f       ser R16
+       4:   bb 07       out $17, R16
+       6:   bb 08       out $18, R16
+       8:   95 0a       dec R16
        a:   cf fd       rjmp    .-6 ; 0x6
 
     $ vavrdisasm --no-opcodes sampleprogram.hex
        0:   rjmp    .+0 ; 0x2
-       2:   ser r16
-       4:   out 0x17, r16
-       6:   out 0x18, r16
-       8:   dec r16
+       2:   ser R16
+       4:   out $17, R16
+       6:   out $18, R16
+       8:   dec R16
        a:   rjmp    .-6 ; 0x6
 
     $ vavrdisasm --no-destination-comments sampleprogram.hex
        0:   c0 00       rjmp    .+0
-       2:   ef 0f       ser r16
-       4:   bb 07       out 0x17, r16
-       6:   bb 08       out 0x18, r16
-       8:   95 0a       dec r16
+       2:   ef 0f       ser R16
+       4:   bb 07       out $17, R16
+       6:   bb 08       out $18, R16
+       8:   95 0a       dec R16
        a:   cf fd       rjmp    .-6
 
     $ vavrdisasm --no-addresses sampleprogram.hex
     c0 00       rjmp    .+0 ; 0x2
-    ef 0f       ser r16
-    bb 07       out 0x17, r16
-    bb 08       out 0x18, r16
-    95 0a       dec r16
+    ef 0f       ser R16
+    bb 07       out $17, R16
+    bb 08       out $18, R16
+    95 0a       dec R16
     cf fd       rjmp    .-6 ; 0x6
 
     $ vavrdisasm -l "A_" sampleprogram.hex
     .org 0x0000
     A_0000: rjmp    A_0002  ; 0x2
-    A_0002: ser r16
-    A_0004: out 0x17, r16
-    A_0006: out 0x18, r16
-    A_0008: dec r16
+    A_0002: ser R16
+    A_0004: out $17, R16
+    A_0006: out $18, R16
+    A_0008: dec R16
     A_000a: rjmp    A_0006  ; 0x6
 
 The above program sample was modified slightly to illustrate vAVRdisasm’s ability to represent data constants in different bases:
 
     $ vavrdisasm --data-base-bin sampleprogram2.hex
        0:   c0 00       rjmp    .+0 ; 0x2
-       2:   ef 0f       ser r16
-       4:   bb 07       out 0x17, r16
-       6:   ea 0f       ldi r16, 0b10101111
-       8:   bb 08       out 0x18, r16
-       a:   95 0a       dec r16
+       2:   ef 0f       ser R16
+       4:   bb 07       out $17, R16
+       6:   ea 0f       ldi R16, 0b10101111
+       8:   bb 08       out $18, R16
+       a:   95 0a       dec R16
        c:   cf fd       rjmp    .-6 ; 0x8
 

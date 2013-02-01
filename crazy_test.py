@@ -83,6 +83,7 @@ for i in range(50):
     lam_sub_word_directive = lambda x: [ x[0], x[1], ".dw" if x[2] == ".word" else x[2], x[3]]
     lam_sub_word_addr_byte_addr = lambda x: [ x[0], x[1], x[2], "0x%x" % (int(x[3], 0)*2) if (x[2] == "call" or x[2] == "jmp") else x[3] ]
     lam_add_des_operand_prefix = lambda x: [ x[0], x[1], x[2], ("0x" + x[3]) if x[2] == "des" else x[3] ]
+    lam_sub_ioreg_operand_prefix = lambda x: [ x[0], x[1], x[2], x[3].replace("$", "0x") ]
 
     ### Post-process objdump disassembly
 
@@ -121,6 +122,8 @@ for i in range(50):
     vavrdisasm_disasm = map(lam_strip_spaces, vavrdisasm_disasm)
     # Replace call/jmp word addresses with byte addresses
     vavrdisasm_disasm = map(lam_sub_word_addr_byte_addr, vavrdisasm_disasm)
+    # Replace I/O register prefix $ with 0x
+    vavrdisasm_disasm = map(lam_sub_ioreg_operand_prefix, vavrdisasm_disasm)
 
     # vavrdisasm_disasm is now an array of string arrays, [ [address, opcode, mneumonic, operands], ... ]
 
