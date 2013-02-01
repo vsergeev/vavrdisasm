@@ -45,23 +45,23 @@ vAVRdisasm should have no problem being compiled with "gmake".
     Written by Vanya A. Sergeev - <vsergeev@gmail.com>.
     
     Additional Options:
-      -o, --out-file <output file>  Write to output file instead of standard output.
+      -o, --out-file <file>         Write to file instead of standard output.
+    
       -t, --file-type <type>        Specify file type of the program file.
+    
       -l, --address-label <prefix>  Create ghetto address labels with
-                                    the specified label prefix.
+                                      the specified label prefix.
     
       --data-base-hex               Represent data constants in hexadecimal
                                       (default).
       --data-base-bin               Represent data constants in binary.
       --data-base-dec               Represent data constants in decimal.
     
-      --no-addresses                Do not display the address alongside
+      --no-addresses                Do not display address alongside disassembly.
+      --no-opcodes                  Do not display original opcode alongside
                                       disassembly.
-      --no-opcodes                  Do not print original opcode data alongside
-                                      disassembly.
-      --no-destination-comments     Do not display the destination address
-                                      comments of relative branch/jump/call
-                                      instructions.
+      --no-destination-comments     Do not display destination address comments
+                                      of relative branch/jump/call instructions.
     
       -h, --help                    Display this usage/help.
       -v, --version                 Display the program's version.
@@ -71,7 +71,7 @@ vAVRdisasm should have no problem being compiled with "gmake".
       Intel HEX8            ihex
       Motorola S-Record     srec
       Raw Binary            binary
-
+    
 
 ## USING vAVRdisasm
 

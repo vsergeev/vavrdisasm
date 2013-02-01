@@ -78,23 +78,23 @@ static void printUsage(const char *programName) {
     printf("vAVRdisasm version 3.0 - 02/01/2013.\n");
     printf("Written by Vanya A. Sergeev - <vsergeev@gmail.com>.\n\n");
     printf("Additional Options:\n\
-  -o, --out-file <output file>  Write to output file instead of standard output.\n\
+  -o, --out-file <file>         Write to file instead of standard output.\n\
+\n\
   -t, --file-type <type>        Specify file type of the program file.\n\
+\n\
   -l, --address-label <prefix>  Create ghetto address labels with\n\
-                                the specified label prefix.\n\
+                                  the specified label prefix.\n\
 \n\
   --data-base-hex               Represent data constants in hexadecimal\n\
                                   (default).\n\
   --data-base-bin               Represent data constants in binary.\n\
   --data-base-dec               Represent data constants in decimal.\n\
 \n\
-  --no-addresses                Do not display the address alongside\n\
+  --no-addresses                Do not display address alongside disassembly.\n\
+  --no-opcodes                  Do not display original opcode alongside\n\
                                   disassembly.\n\
-  --no-opcodes                  Do not print original opcode data alongside\n\
-                                  disassembly.\n\
-  --no-destination-comments     Do not display the destination address\n\
-                                  comments of relative branch/jump/call\n\
-                                  instructions.\n\
+  --no-destination-comments     Do not display destination address comments\n\
+                                  of relative branch/jump/call instructions.\n\
 \n\
   -h, --help                    Display this usage/help.\n\
   -v, --version                 Display the program's version.\n\n");
