@@ -1,9 +1,9 @@
   * Release 3.0 - 02/01/2013
       * Complete rewrite of vAVRdisasm to an opcode->disasm->format stream architecture.
-      * Added more robust support for malformed input that might have single bytes on EOF or address boundaries.
+      * Added decoding support for malformed input that might have single bytes on EOF or address boundaries.
       * Added binary file support with `-t binary` or `--file-type binary` option.
       * Added comprehensive fuzzing and avr-objdump comparison test (see crazy_test.py or `make test`).
-      * Modified default disassembly output to include original opcodes of disassembled instructions.
+      * Modified default disassembly output to include original opcodes alongside disassembled instructions.
   * Release 2.0 - 09/24/2011
       * Changed address operand formatting for LDS, STS, JMP, and CALL instructions from byte addreses to word addresses, to make vAVRdisasm's output compatible with AVR assemblers.
       * Fixed signed relative branch/jump decoding: jumps in the reverse direction are now correctly decoded.
