@@ -1,6 +1,6 @@
 ## ABOUT vAVRdisasm
 
-vAVRdisasm is an Atmel 8-bit AVR firmware disassembler. This single-pass disassembler can read Atmel Generic, Intel HEX8, and Motorola S-Record formatted files containing valid AVR program binaries.
+vAVRdisasm is an 8-bit Atmel AVR firmware disassembler. This single-pass disassembler can read Atmel Generic, Intel HEX8, and Motorola S-Record formatted files containing valid AVR program binaries.
 
 It supports all 142 8-bit AVR instructions as defined by the [Atmel AVR Instruction Set](http://www.atmel.com/atmel/acrobat/doc0856.pdf) revision 0856I-AVR-07/10.
 
