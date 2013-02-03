@@ -133,7 +133,7 @@ int main(int argc, const char *argv[]) {
     int optc;
     /* Input / Output files */
     char file_type_str[8] = {0};
-    char *file_out_path = NULL;
+    char file_out_path[4096] = {0};
     FILE *file_in = NULL, *file_out = NULL;
     int file_type = 0;
     /* Formatting options */
@@ -164,7 +164,7 @@ int main(int argc, const char *argv[]) {
                 break;
             case 'o':
                 if (strcmp(optarg, "-") != 0)
-                    file_out_path = strdup(optarg);
+                    strncpy(file_out_path, optarg, sizeof(file_out_path));
                 break;
             case 'h':
                 printUsage(argv[0]);
@@ -240,14 +240,12 @@ int main(int argc, const char *argv[]) {
     /*** Open output file ***/
 
     /* If an output file was specified */
-    if (file_out_path != NULL) {
+    if (file_out_path[0] != '\0') {
         file_out = fopen(file_out_path, "w");
         if (file_out == NULL) {
             perror("Error opening output file for writing");
             goto cleanup_exit_failure;
         }
-        free(file_out_path);
-        file_out_path = NULL;
     } else {
     /* Otherwise, default the output file to stdout */
         file_out = stdout;
@@ -348,11 +346,9 @@ int main(int argc, const char *argv[]) {
     }
 
     /* Load format options into the Format Stream */
-    struct format_stream_avr_state *options;
-    options = (struct format_stream_avr_state *)fs.state;
-    options->flags = format_flags;
-    options->address_width = format_address_width;
-    options->prefixes = format_prefixes;
+    ((struct format_stream_avr_state *)fs.state)->flags = format_flags;
+    ((struct format_stream_avr_state *)fs.state)->address_width = format_address_width;
+    ((struct format_stream_avr_state *)fs.state)->prefixes = format_prefixes;
 
     /* Read from Format Stream until EOF */
     while ( (ret = fs.stream_read(&fs, file_out)) != STREAM_EOF ) {
@@ -380,8 +376,6 @@ int main(int argc, const char *argv[]) {
         fclose(file_in);
     if (file_out != stdout && file_out != NULL)
         fclose(file_out);
-    if (file_out_path != NULL)
-        free(file_out_path);
     exit(EXIT_FAILURE);
 }
 

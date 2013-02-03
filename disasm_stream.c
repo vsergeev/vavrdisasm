@@ -85,7 +85,7 @@ static int util_bits_data_from_mask(uint16_t data, uint16_t mask) {
     return result;
 }
 
-static int util_iset_lookup_by_opcode(uint16_t opcode) {
+static struct avrInstructionInfo *util_iset_lookup_by_opcode(uint16_t opcode) {
     int i, j;
 
     uint16_t instructionBits;
@@ -99,21 +99,21 @@ static int util_iset_lookup_by_opcode(uint16_t opcode) {
 
         /* Compare left over instruction bits with the instruction mask */
         if (instructionBits == AVR_Instruction_Set[i].instructionMask)
-            return i;
+            return &AVR_Instruction_Set[i];
     }
 
-    return -1;
+    return NULL;
 }
 
-static int util_iset_lookup_by_mnemonic(char *m) {
+static struct avrInstructionInfo *util_iset_lookup_by_mnemonic(char *m) {
     int i;
 
     for (i = 0; i < AVR_TOTAL_INSTRUCTIONS; i++) {
         if (strcmp(m, AVR_Instruction_Set[i].mnemonic) == 0)
-            return i;
+            return &AVR_Instruction_Set[i];
     }
 
-    return -1;
+    return NULL;
 }
 
 static int util_opbuffer_len_consecutive(struct disasm_stream_avr_state *state) {
@@ -131,19 +131,16 @@ static int util_opbuffer_len_consecutive(struct disasm_stream_avr_state *state) 
 }
 
 static void util_opbuffer_shift(struct disasm_stream_avr_state *state, int n) {
-    int i;
+    int i, j;
 
     for (i = 0; i < n; i++) {
-        /* Shift the data slots down by one */
-        state->data[0] = state->data[1];
-        state->data[1] = state->data[2];
-        state->data[2] = state->data[3];
-        state->data[3] = 0x00;
-        /* Shift the address slots down by one */
-        state->address[0] = state->address[1];
-        state->address[1] = state->address[2];
-        state->address[2] = state->address[3];
-        state->address[3] = 0x00;
+        /* Shift the data and address slots down by one */
+        for (j = 0; j < sizeof(state->data) - 1; j++) {
+            state->data[j] = state->data[j+1];
+            state->address[j] = state->address[j+1];
+        }
+        state->data[j] = 0x00;
+        state->address[j] = 0x00;
         /* Update the opcode buffer length */
         if (state->len > 0)
             state->len--;
@@ -242,13 +239,13 @@ int disasm_stream_avr_read(struct DisasmStream *self, void *idisasm) {
         /* Two or more consecutive bytes */
         if (lenConsecutive >= 2) {
             uint16_t opcode; uint32_t operand;
-            int instructionIndex, i;
+            struct avrInstructionInfo *instruction;
+            int i;
 
             /* Assemble the 16-bit opcode from little-endian input */
             opcode = (uint16_t)(state->data[1] << 8) | (uint16_t)(state->data[0]);
             /* Look up the instruction in our instruction set */
-            instructionIndex = util_iset_lookup_by_opcode(opcode);
-            if (instructionIndex == -1) {
+            if ( (instruction = util_iset_lookup_by_opcode(opcode)) == NULL) {
                 /* This should never happen because of the .DW instruction that
                  * matches any 16-bit opcode */
                 self->error = "Error, catastrophic failure! Malformed instruction set!";
@@ -256,20 +253,20 @@ int disasm_stream_avr_read(struct DisasmStream *self, void *idisasm) {
             }
 
             /* If this is a 16-bit wide instruction */
-            if (AVR_Instruction_Set[instructionIndex].operandTypes[0] != OPERAND_LONG_ABSOLUTE_ADDRESS &&
-                AVR_Instruction_Set[instructionIndex].operandTypes[1] != OPERAND_LONG_ABSOLUTE_ADDRESS) {
+            if (instruction->operandTypes[0] != OPERAND_LONG_ABSOLUTE_ADDRESS &&
+                instruction->operandTypes[1] != OPERAND_LONG_ABSOLUTE_ADDRESS) {
                 /* Decode and return the 16-bit instruction */
                 memset(instrDisasm, 0, sizeof(struct avrInstructionDisasm));
                 instrDisasm->address = state->address[0];
                 instrDisasm->opcode[0] = state->data[0]; instrDisasm->opcode[1] = state->data[1];
                 instrDisasm->width = 2;
-                instrDisasm->instructionSetEntry = &AVR_Instruction_Set[instructionIndex];
+                instrDisasm->instructionSetEntry = instruction;
                 /* Disassemble the operands */
-                for (i = 0; i < instrDisasm->instructionSetEntry->numOperands; i++) {
+                for (i = 0; i < instruction->numOperands; i++) {
                     /* Extract the operand bits */
-                    operand = util_bits_data_from_mask(opcode, instrDisasm->instructionSetEntry->operandMasks[i]);
+                    operand = util_bits_data_from_mask(opcode, instruction->operandMasks[i]);
                     /* Disassemble the operand */
-                    instrDisasm->operandDisasms[i] = util_disasm_operand(operand, instrDisasm->instructionSetEntry->operandTypes[i]);
+                    instrDisasm->operandDisasms[i] = util_disasm_operand(operand, instruction->operandTypes[i]);
                 }
                 /* Shift out the processed byte(s) from our opcode buffer */
                 util_opbuffer_shift(state, 2);
@@ -285,18 +282,18 @@ int disasm_stream_avr_read(struct DisasmStream *self, void *idisasm) {
                     instrDisasm->opcode[0] = state->data[0]; instrDisasm->opcode[1] = state->data[1];
                     instrDisasm->opcode[2] = state->data[2]; instrDisasm->opcode[3] = state->data[3];
                     instrDisasm->width = 4;
-                    instrDisasm->instructionSetEntry = &AVR_Instruction_Set[instructionIndex];
+                    instrDisasm->instructionSetEntry = instruction;
                     /* Disassemble the operands */
-                    for (i = 0; i < instrDisasm->instructionSetEntry->numOperands; i++) {
+                    for (i = 0; i < instruction->numOperands; i++) {
                         /* Extract the operand bits */
-                        operand = util_bits_data_from_mask(opcode, instrDisasm->instructionSetEntry->operandMasks[i]);
+                        operand = util_bits_data_from_mask(opcode, instruction->operandMasks[i]);
 
                         /* Append the extra bits if it's a long operand */
-                        if (instrDisasm->instructionSetEntry->operandTypes[i] == OPERAND_LONG_ABSOLUTE_ADDRESS)
+                        if (instruction->operandTypes[i] == OPERAND_LONG_ABSOLUTE_ADDRESS)
                             operand = (uint32_t)(operand << 16) | (uint32_t)(state->data[3] << 8) | (uint32_t)(state->data[2]);
 
                         /* Disassemble the operand */
-                        instrDisasm->operandDisasms[i] = util_disasm_operand(operand, instrDisasm->instructionSetEntry->operandTypes[i]);
+                        instrDisasm->operandDisasms[i] = util_disasm_operand(operand, instruction->operandTypes[i]);
                     }
                     /* Shift out the processed byte(s) from our opcode buffer */
                     util_opbuffer_shift(state, 4);
@@ -345,7 +342,7 @@ int disasm_stream_avr_read(struct DisasmStream *self, void *idisasm) {
         if (readLen) {
             /* If we have an opcode buffer overflow (this should never happen
              * if the decoding logic above is correct) */
-            if (state->len == 4) {
+            if (state->len == sizeof(state->data)) {
                 self->error = "Error, catastrophic failure! Opcode buffer overflowed!";
                 return STREAM_ERROR_FAILURE;
             }
@@ -503,7 +500,7 @@ static int test_disasm_unit_test_run(char *name, uint8_t *test_data, uint32_t *t
 
 void test_disasm_stream_unit_tests(void) {
     int numTests = 0, passedTests = 0;
-    int (*lookup)(char *) = util_iset_lookup_by_mnemonic;
+    struct avrInstructionInfo *(*lookup)(char *) = util_iset_lookup_by_mnemonic;
 
     /* Check Sample Program */
     /* rjmp .0; ser R16; out $17, R16; out $18, R16; dec R16; rjmp .-6 */
@@ -511,12 +508,12 @@ void test_disasm_stream_unit_tests(void) {
         uint8_t d[] =  {0x00, 0xc0, 0x0f, 0xef, 0x07, 0xbb, 0x08, 0xbb, 0x0a, 0x95, 0xfd, 0xcf};
         uint32_t a[] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b};
         struct avrInstructionDisasm dis[] = {
-                                                {0x00, {0}, 2, &AVR_Instruction_Set[lookup("rjmp")], {0, 0x00}},
-                                                {0x02, {0}, 2, &AVR_Instruction_Set[lookup("ser")], {16, 0x00}},
-                                                {0x04, {0}, 2, &AVR_Instruction_Set[lookup("out")], {0x17, 0x10}},
-                                                {0x06, {0}, 2, &AVR_Instruction_Set[lookup("out")], {0x18, 0x10}},
-                                                {0x08, {0}, 2, &AVR_Instruction_Set[lookup("dec")], {16, 0x00}},
-                                                {0x0a, {0}, 2, &AVR_Instruction_Set[lookup("rjmp")], {-6, 0x00}},
+                                                {0x00, {0}, 2, lookup("rjmp"), {0, 0x00}},
+                                                {0x02, {0}, 2, lookup("ser"), {16, 0x00}},
+                                                {0x04, {0}, 2, lookup("out"), {0x17, 0x10}},
+                                                {0x06, {0}, 2, lookup("out"), {0x18, 0x10}},
+                                                {0x08, {0}, 2, lookup("dec"), {16, 0x00}},
+                                                {0x0a, {0}, 2, lookup("rjmp"), {-6, 0x00}},
                                             };
         if (test_disasm_unit_test_run("Sample Program", &d[0], &a[0], sizeof(d), &dis[0], sizeof(dis)/sizeof(dis[0])) == 0)
             passedTests++;
@@ -529,10 +526,10 @@ void test_disasm_stream_unit_tests(void) {
         uint8_t d[] =  {0xad, 0x94, 0x5a, 0x5d, 0x0e, 0x94, 0x07, 0xf8, 0x20, 0x92, 0x34, 0x12, 0x30, 0x90, 0x80, 0x67};
         uint32_t a[] = {0x00, 0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0a, 0x0b, 0x0c, 0x0d, 0x0e, 0x0f};
         struct avrInstructionDisasm dis[] = {
-                                                {0x00, {0}, 4, &AVR_Instruction_Set[lookup("jmp")], {0x2abab4, 0x00}},
-                                                {0x04, {0}, 4, &AVR_Instruction_Set[lookup("call")], {0x1f00e, 0x00}},
-                                                {0x08, {0}, 4, &AVR_Instruction_Set[lookup("sts")], {0x2468, 2}},
-                                                {0x0c, {0}, 4, &AVR_Instruction_Set[lookup("lds")], {3, 0xcf00}},
+                                                {0x00, {0}, 4, lookup("jmp"), {0x2abab4, 0x00}},
+                                                {0x04, {0}, 4, lookup("call"), {0x1f00e, 0x00}},
+                                                {0x08, {0}, 4, lookup("sts"), {0x2468, 2}},
+                                                {0x0c, {0}, 4, lookup("lds"), {3, 0xcf00}},
                                             };
         if (test_disasm_unit_test_run("32-bit Instructions", &d[0], &a[0], sizeof(d), &dis[0], sizeof(dis)/sizeof(dis[0])) == 0)
             passedTests++;
@@ -545,7 +542,7 @@ void test_disasm_stream_unit_tests(void) {
         uint8_t d[] = {0x18};
         uint32_t a[] = {0x500};
         struct avrInstructionDisasm dis[] = {
-                                                {0x500, {0}, 1, &AVR_Instruction_Set[lookup(".db")], {0x18, 0x00}},
+                                                {0x500, {0}, 1, lookup(".db"), {0x18, 0x00}},
                                             };
         if (test_disasm_unit_test_run("EOF Lone Byte", &d[0], &a[0], sizeof(d), &dis[0], sizeof(dis)/sizeof(dis[0])) == 0)
             passedTests++;
@@ -558,8 +555,8 @@ void test_disasm_stream_unit_tests(void) {
         uint8_t d[] = {0x18, 0x12, 0x33};
         uint32_t a[] = {0x500, 0x502, 0x503};
         struct avrInstructionDisasm dis[] = {
-                                                {0x500, {0}, 1, &AVR_Instruction_Set[lookup(".db")], {0x18, 0x00}},
-                                                {0x502, {0}, 2, &AVR_Instruction_Set[lookup("cpi")], {0x11, 0x32}},
+                                                {0x500, {0}, 1, lookup(".db"), {0x18, 0x00}},
+                                                {0x502, {0}, 2, lookup("cpi"), {0x11, 0x32}},
                                             };
         if (test_disasm_unit_test_run("Boundary Lone Byte", &d[0], &a[0], sizeof(d), &dis[0], sizeof(dis)/sizeof(dis[0])) == 0)
             passedTests++;
@@ -571,8 +568,8 @@ void test_disasm_stream_unit_tests(void) {
     {
         uint8_t d[] = {0xae, 0x94, 0xab};
         uint32_t a[] = {0x500, 0x501, 0x502};
-        struct avrInstructionDisasm dis[] = {   {0x500, {0}, 2, &AVR_Instruction_Set[lookup(".dw")], {0x94ae, 0x00}},
-                                                {0x502, {0}, 1, &AVR_Instruction_Set[lookup(".db")], {0xab, 0x00}},
+        struct avrInstructionDisasm dis[] = {   {0x500, {0}, 2, lookup(".dw"), {0x94ae, 0x00}},
+                                                {0x502, {0}, 1, lookup(".db"), {0xab, 0x00}},
                                             };
         if (test_disasm_unit_test_run("EOF Lone Wide Instruction", &d[0], &a[0], sizeof(d), &dis[0], sizeof(dis)/sizeof(dis[0])) == 0)
             passedTests++;
@@ -584,8 +581,8 @@ void test_disasm_stream_unit_tests(void) {
     {
         uint8_t d[] = {0xae, 0x94, 0xab, 0xcd};
         uint32_t a[] = {0x500, 0x501, 0x504, 0x505};
-        struct avrInstructionDisasm dis[] = {   {0x500, {0}, 2, &AVR_Instruction_Set[lookup(".dw")], {0x94ae, 0x00}},
-                                                {0x504, {0}, 2, &AVR_Instruction_Set[lookup("rjmp")], {-0x4aa, 0x00}},
+        struct avrInstructionDisasm dis[] = {   {0x500, {0}, 2, lookup(".dw"), {0x94ae, 0x00}},
+                                                {0x504, {0}, 2, lookup("rjmp"), {-0x4aa, 0x00}},
                                             };
         if (test_disasm_unit_test_run("Boundary Lone Wide Instruction", &d[0], &a[0], sizeof(d), &dis[0], sizeof(dis)/sizeof(dis[0])) == 0)
             passedTests++;
