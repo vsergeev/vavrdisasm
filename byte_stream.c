@@ -6,30 +6,27 @@
 #include "libGIS-1.0.5/ihex.h"
 #include "libGIS-1.0.5/srecord.h"
 
-#include "opcode_stream.h"
+#include "byte_stream.h"
 #include "stream_error.h"
 
 /******************************************************************************/
 /* Atmel Generic file support */
 /******************************************************************************/
 
-struct opcode_stream_generic_state {
+struct byte_stream_generic_state {
     AtmelGenericRecord aRec;
     int availBytes;
 };
 
-int opcode_stream_generic_init(struct OpcodeStream *self) {
-    struct opcode_stream_generic_state *state;
-
+int byte_stream_generic_init(struct ByteStream *self) {
     /* Allocate stream state */
-    self->state = malloc(sizeof(struct opcode_stream_generic_state));
+    self->state = malloc(sizeof(struct byte_stream_generic_state));
     if (self->state == NULL) {
         self->error = "Error allocating opcode stream state!";
         return STREAM_ERROR_ALLOC;
     }
     /* Initialize stream state */
-    state = (struct opcode_stream_generic_state *)self->state;
-    state->availBytes = 0;
+    memset(self->state, 0, sizeof(struct byte_stream_generic_state));
 
     /* Reset error string to NULL */
     self->error = NULL;
@@ -40,7 +37,7 @@ int opcode_stream_generic_init(struct OpcodeStream *self) {
     return 0;
 }
 
-int opcode_stream_generic_close(struct OpcodeStream *self) {
+int byte_stream_generic_close(struct ByteStream *self) {
     /* Free stream state memory */
     free(self->state);
 
@@ -50,8 +47,8 @@ int opcode_stream_generic_close(struct OpcodeStream *self) {
     return 0;
 }
 
-int opcode_stream_generic_read(struct OpcodeStream *self, uint8_t *data, uint32_t *address, unsigned int *len, unsigned int n) {
-    struct opcode_stream_generic_state *state = (struct opcode_stream_generic_state *)self->state;
+int byte_stream_generic_read(struct ByteStream *self, uint8_t *data, uint32_t *address, unsigned int *len, unsigned int n) {
+    struct byte_stream_generic_state *state = (struct byte_stream_generic_state *)self->state;
 
     int i, ret;
 
@@ -106,23 +103,20 @@ int opcode_stream_generic_read(struct OpcodeStream *self, uint8_t *data, uint32_
 /* Intel IHEX file support */
 /******************************************************************************/
 
-struct opcode_stream_ihex_state {
+struct byte_stream_ihex_state {
     IHexRecord iRec;
     int availBytes;
 };
 
-int opcode_stream_ihex_init(struct OpcodeStream *self) {
-    struct opcode_stream_ihex_state *state;
-
+int byte_stream_ihex_init(struct ByteStream *self) {
     /* Allocate stream state */
-    self->state = malloc(sizeof(struct opcode_stream_ihex_state));
+    self->state = malloc(sizeof(struct byte_stream_ihex_state));
     if (self->state == NULL) {
         self->error = "Error allocating opcode stream state!";
         return STREAM_ERROR_ALLOC;
     }
     /* Initialize stream state */
-    state = (struct opcode_stream_ihex_state *)self->state;
-    state->availBytes = 0;
+    memset(self->state, 0, sizeof(struct byte_stream_ihex_state));
 
     /* Reset error string to NULL */
     self->error = NULL;
@@ -133,7 +127,7 @@ int opcode_stream_ihex_init(struct OpcodeStream *self) {
     return 0;
 }
 
-int opcode_stream_ihex_close(struct OpcodeStream *self) {
+int byte_stream_ihex_close(struct ByteStream *self) {
     /* Free stream state memory */
     free(self->state);
 
@@ -143,9 +137,9 @@ int opcode_stream_ihex_close(struct OpcodeStream *self) {
     return 0;
 }
 
-int opcode_stream_ihex_read(struct OpcodeStream *self, uint8_t *data, uint32_t *address, unsigned int *len, unsigned int n) {
+int byte_stream_ihex_read(struct ByteStream *self, uint8_t *data, uint32_t *address, unsigned int *len, unsigned int n) {
     int i, ret;
-    struct opcode_stream_ihex_state *state = (struct opcode_stream_ihex_state *)self->state;
+    struct byte_stream_ihex_state *state = (struct byte_stream_ihex_state *)self->state;
 
     /* Return up to n bytes */
     for (i = 0; i < n; ) {
@@ -196,23 +190,20 @@ int opcode_stream_ihex_read(struct OpcodeStream *self, uint8_t *data, uint32_t *
 /* Motorola S-Record file support */
 /******************************************************************************/
 
-struct opcode_stream_srecord_state {
+struct byte_stream_srecord_state {
     SRecord sRec;
     int availBytes;
 };
 
-int opcode_stream_srecord_init(struct OpcodeStream *self) {
-    struct opcode_stream_srecord_state *state;
-
+int byte_stream_srecord_init(struct ByteStream *self) {
     /* Allocate stream state */
-    self->state = malloc(sizeof(struct opcode_stream_srecord_state));
+    self->state = malloc(sizeof(struct byte_stream_srecord_state));
     if (self->state == NULL) {
         self->error = "Error allocating opcode stream state!";
         return STREAM_ERROR_ALLOC;
     }
     /* Initialize stream state */
-    state = (struct opcode_stream_srecord_state *)self->state;
-    state->availBytes = 0;
+    memset(self->state, 0, sizeof(struct byte_stream_srecord_state));
 
     /* Reset error string to NULL */
     self->error = NULL;
@@ -223,7 +214,7 @@ int opcode_stream_srecord_init(struct OpcodeStream *self) {
     return 0;
 }
 
-int opcode_stream_srecord_close(struct OpcodeStream *self) {
+int byte_stream_srecord_close(struct ByteStream *self) {
     /* Free stream state memory */
     free(self->state);
 
@@ -233,9 +224,9 @@ int opcode_stream_srecord_close(struct OpcodeStream *self) {
     return 0;
 }
 
-int opcode_stream_srecord_read(struct OpcodeStream *self, uint8_t *data, uint32_t *address, unsigned int *len, unsigned int n) {
+int byte_stream_srecord_read(struct ByteStream *self, uint8_t *data, uint32_t *address, unsigned int *len, unsigned int n) {
     int i, ret;
-    struct opcode_stream_srecord_state *state = (struct opcode_stream_srecord_state *)self->state;
+    struct byte_stream_srecord_state *state = (struct byte_stream_srecord_state *)self->state;
 
     /* Return up to n bytes */
     for (i = 0; i < n; ) {
@@ -283,25 +274,22 @@ int opcode_stream_srecord_read(struct OpcodeStream *self, uint8_t *data, uint32_
 }
 
 /******************************************************************************/
-/* Binary Opcode Stream Support */
+/* Binary Byte Stream Support */
 /******************************************************************************/
 
-struct opcode_stream_binary_state {
+struct byte_stream_binary_state {
     uint32_t address;
 };
 
-int opcode_stream_binary_init(struct OpcodeStream *self) {
-    struct opcode_stream_binary_state *state;
-
+int byte_stream_binary_init(struct ByteStream *self) {
     /* Allocate stream state */
-    self->state = malloc(sizeof(struct opcode_stream_binary_state));
+    self->state = malloc(sizeof(struct byte_stream_binary_state));
     if (self->state == NULL) {
         self->error = "Error allocating opcode stream state!";
         return STREAM_ERROR_ALLOC;
     }
     /* Initialize stream state */
-    state = (struct opcode_stream_binary_state *)self->state;
-    state->address = 0;
+    memset(self->state, 0, sizeof(struct byte_stream_binary_state));
 
     /* Reset error string to NULL */
     self->error = NULL;
@@ -312,7 +300,7 @@ int opcode_stream_binary_init(struct OpcodeStream *self) {
     return 0;
 }
 
-int opcode_stream_binary_close(struct OpcodeStream *self) {
+int byte_stream_binary_close(struct ByteStream *self) {
     /* Free stream state memory */
     free(self->state);
 
@@ -322,9 +310,9 @@ int opcode_stream_binary_close(struct OpcodeStream *self) {
     return 0;
 }
 
-int opcode_stream_binary_read(struct OpcodeStream *self, uint8_t *data, uint32_t *address, unsigned int *len, unsigned int n) {
+int byte_stream_binary_read(struct ByteStream *self, uint8_t *data, uint32_t *address, unsigned int *len, unsigned int n) {
     int i, bytes_read;
-    struct opcode_stream_binary_state *state = (struct opcode_stream_binary_state *)self->state;
+    struct byte_stream_binary_state *state = (struct byte_stream_binary_state *)self->state;
 
     /* Return up to n bytes */
     bytes_read = fread(data, 1, n, self->in);
@@ -348,31 +336,25 @@ int opcode_stream_binary_read(struct OpcodeStream *self, uint8_t *data, uint32_t
 }
 
 /******************************************************************************/
-/* Debug Opcode Stream Support */
+/* Debug Byte Stream Support */
 /******************************************************************************/
 
-struct opcode_stream_debug_state {
+struct byte_stream_debug_state {
     uint8_t *data;
     uint32_t *address;
     unsigned int len;
     int index;
 };
 
-int opcode_stream_debug_init(struct OpcodeStream *self) {
-    struct opcode_stream_debug_state *state;
-
+int byte_stream_debug_init(struct ByteStream *self) {
     /* Allocate stream state */
-    self->state = malloc(sizeof(struct opcode_stream_debug_state));
+    self->state = malloc(sizeof(struct byte_stream_debug_state));
     if (self->state == NULL) {
         self->error = "Error allocating opcode stream state!";
         return STREAM_ERROR_ALLOC;
     }
     /* Initialize stream state */
-    state = (struct opcode_stream_debug_state *)self->state;
-    state->data = NULL;
-    state->address = NULL;
-    state->len = 0;
-    state->index = 0;
+    memset(self->state, 0, sizeof(struct byte_stream_debug_state));
 
     /* Reset error string to NULL */
     self->error = NULL;
@@ -383,7 +365,7 @@ int opcode_stream_debug_init(struct OpcodeStream *self) {
     return 0;
 }
 
-int opcode_stream_debug_close(struct OpcodeStream *self) {
+int byte_stream_debug_close(struct ByteStream *self) {
     /* Free stream state memory */
     free(self->state);
 
@@ -393,8 +375,8 @@ int opcode_stream_debug_close(struct OpcodeStream *self) {
     return 0;
 }
 
-int opcode_stream_debug_read(struct OpcodeStream *self, uint8_t *data, uint32_t *address, unsigned int *len, unsigned int n) {
-    struct opcode_stream_debug_state *state = (struct opcode_stream_debug_state *)self->state;
+int byte_stream_debug_read(struct ByteStream *self, uint8_t *data, uint32_t *address, unsigned int *len, unsigned int n) {
+    struct byte_stream_debug_state *state = (struct byte_stream_debug_state *)self->state;
 
     int i;
 
@@ -419,11 +401,11 @@ int opcode_stream_debug_read(struct OpcodeStream *self, uint8_t *data, uint32_t 
 }
 
 /******************************************************************************/
-/* Opcode Stream File Test */
+/* Byte Stream File Test */
 /******************************************************************************/
 
-int test_opcode_stream(FILE *in, int (*stream_init)(struct OpcodeStream *self), int (*stream_close)(struct OpcodeStream *self), int (*stream_read)(struct OpcodeStream *self, uint8_t *data, uint32_t *address, unsigned int *len, unsigned int n)) {
-    struct OpcodeStream os;
+int test_byte_stream(FILE *in, int (*stream_init)(struct ByteStream *self), int (*stream_close)(struct ByteStream *self), int (*stream_read)(struct ByteStream *self, uint8_t *data, uint32_t *address, unsigned int *len, unsigned int n)) {
+    struct ByteStream os;
 
     uint8_t data[512];
     uint32_t address[512];
@@ -431,13 +413,13 @@ int test_opcode_stream(FILE *in, int (*stream_init)(struct OpcodeStream *self), 
 
     int i;
 
-    /* Setup the Opcode Stream */
+    /* Setup the Byte Stream */
     os.in = in;
     os.stream_init = stream_init;
     os.stream_close = stream_close;
     os.stream_read = stream_read;
 
-    printf("Running test_opcode_stream()\n\n");
+    printf("Running test_byte_stream()\n\n");
 
     /* Initialize the stream */
     printf("os.stream_init(): %d\n", os.stream_init(&os));

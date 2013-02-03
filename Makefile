@@ -1,7 +1,10 @@
 CC = gcc
-CFLAGS = -Wall -O3 -D_GNU_SOURCE
+CFLAGS = -Wall -O3 -D_GNU_SOURCE -I.
 LDFLAGS=
-OBJECTS = libGIS-1.0.5/atmel_generic.o libGIS-1.0.5/ihex.o libGIS-1.0.5/srecord.o avr_instruction_set.o opcode_stream.o disasm_stream.o format_stream.o main.o
+LIBGIS_OBJECTS = libGIS-1.0.5/atmel_generic.o libGIS-1.0.5/ihex.o libGIS-1.0.5/srecord.o
+CORE_OBJECTS = byte_stream.o main.o
+AVR_OBJECTS = avr/avr_instruction_set.o avr/avr_disasm_stream.o avr/avr_print_stream.o
+OBJECTS = $(LIBGIS_OBJECTS) $(CORE_OBJECTS) $(AVR_OBJECTS)
 PROGNAME = vavrdisasm
 PREFIX = /usr/local
 BINDIR = $(PREFIX)/bin
