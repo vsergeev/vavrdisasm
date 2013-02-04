@@ -24,9 +24,11 @@
 #define PIC_ADDRESS_WIDTH               4
 
 int pic_instruction_print_origin(struct instruction *instr, FILE *out, int flags) {
-    /* Print an origin directive */
-    if (fprintf(out, "org %s%0*x\n", PIC_PREFIX_ABSOLUTE_ADDRESS, PIC_ADDRESS_WIDTH, instr->address) < 0)
-        return -1;
+    /* Print an origin directive if we're outputting assembly */
+    if (flags & PRINT_FLAG_ASSEMBLY) {
+        if (fprintf(out, "org %s%0*x\n", PIC_PREFIX_ABSOLUTE_ADDRESS, PIC_ADDRESS_WIDTH, instr->address) < 0)
+            return -1;
+    }
     return 0;
 }
 
