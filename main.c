@@ -124,7 +124,7 @@ int main(int argc, const char *argv[]) {
     /* Disassembler Streams */
     int file_type = 0;
     int arch = ARCH_AVR8;
-    int flags;
+    int flags = 0;
     struct ByteStream bs;
     struct DisasmStream ds;
     struct PrintStream ps;
@@ -261,7 +261,7 @@ int main(int argc, const char *argv[]) {
     if (!no_addresses)
         flags |= PRINT_FLAG_ADDRESSES;
     if (!no_destination_comments)
-        flags |= PRINT_FLAG_DEST_ADDR_COMMENT;
+        flags |= PRINT_FLAG_DESTINATION_COMMENT;
     if (!no_opcodes)
         flags |= PRINT_FLAG_OPCODES;
 

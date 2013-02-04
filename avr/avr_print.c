@@ -20,81 +20,49 @@
 #define AVR_PREFIX_RAW_BYTE             "0x" /* .db 0xab */
 #define AVR_PREFIX_ADDRESS_LABEL        "A_" /* A_0004: */
 
-/* Objdump format prefixes */
-#if 0
-#define AVR_PREFIX_REGISTER             "r"  /* mov r0, r2 */
-#define AVR_PREFIX_IO_REGISTER          "0x" /* out 0x39, r16 */
-#define AVR_PREFIX_DATA_HEX             "0x" /* ldi r16, 0x3d */
-#define AVR_PREFIX_DATA_BIN             "0b" /* ldi r16, 0b00111101 */
-#define AVR_PREFIX_DATA_DEC             ""   /* ldi r16, 61 */
-#define AVR_PREFIX_BIT                  ""   /* cbi 0x12, 7 */
-#define AVR_PREFIX_ABSOLUTE_ADDRESS     "0x" /* call 0x1234 */
-#define AVR_PREFIX_RELATIVE_ADDRESS     "."  /* rjmp .4 */
-#define AVR_PREFIX_DES_ROUND            ""   /* des 1 */
-#define AVR_PREFIX_RAW_WORD             "0x" /* .dw 0xabcd */
-#define AVR_PREFIX_RAW_BYTE             "0x" /* .db 0xab */
-#define AVR_PREFIX_ADDRESS_LABEL        "A_" /* A_0004: */
-#endif
-
 /* Address filed width, e.g. 4 -> 0x0004 */
 #define AVR_ADDRESS_WIDTH               4
 
 int avr_instruction_print_origin(struct instruction *instr, FILE *out, int flags) {
-    struct avrInstructionDisasm *instrDisasm = (struct avrInstructionDisasm *)instr->instructionDisasm;
-
-    /* If we're printing assemble-able code, drop an origin directive */
-    if (flags & PRINT_FLAG_ASSEMBLY)
-        return fprintf(out, ".org %s%0*x\n", AVR_PREFIX_ABSOLUTE_ADDRESS, AVR_ADDRESS_WIDTH, instrDisasm->address);
-
+    if (fprintf(out, ".org %s%0*x\n", AVR_PREFIX_ABSOLUTE_ADDRESS, AVR_ADDRESS_WIDTH, instr->address) < 0)
+        return -1;
     return 0;
 }
 
-int avr_instruction_print_address(struct instruction *instr, FILE *out, int flags) {
-    struct avrInstructionDisasm *instrDisasm = (struct avrInstructionDisasm *)instr->instructionDisasm;
-
-    /* If we're printing assemble-able code, print an address label like
-     * "A_0010:" */
-    if (flags & PRINT_FLAG_ASSEMBLY)
-        return fprintf(out, "%s%0*x:\t", AVR_PREFIX_ADDRESS_LABEL, AVR_ADDRESS_WIDTH, instrDisasm->address);
-    /* Or just a plain address like "0010:" */
-    else if (flags & PRINT_FLAG_ADDRESSES)
-        return fprintf(out, "%*x:\t", AVR_ADDRESS_WIDTH, instrDisasm->address);
-
-    return 0;
-}
-
-int avr_instruction_print_opcodes(struct instruction *instr, FILE *out, int flags) {
-    struct avrInstructionDisasm *instrDisasm = (struct avrInstructionDisasm *)instr->instructionDisasm;
-
-    /* Print original opcodes, if we're not generating address labels */
-    if (flags & PRINT_FLAG_OPCODES && !(flags & PRINT_FLAG_ASSEMBLY)) {
-        /* If this is an 8-bit data byte */
-        if (instrDisasm->instructionInfo->width == 1)
-            return fprintf(out, "%02x         \t", instrDisasm->opcode[0]);
-
-        /* If this is a 16-bit instruction */
-        else if (instrDisasm->instructionInfo->width == 2)
-            return fprintf(out, "%02x %02x      \t", instrDisasm->opcode[1], instrDisasm->opcode[0]);
-
-        /* If this is a 32-bit instruction */
-        else if (instrDisasm->instructionInfo->width == 4)
-            return fprintf(out, "%02x %02x %02x %02x\t", instrDisasm->opcode[3], instrDisasm->opcode[2], instrDisasm->opcode[1], instrDisasm->opcode[0]);
-    }
-
-    return 0;
-}
-
-int avr_instruction_print_mnemonic(struct instruction *instr, FILE *out, int flags) {
-    struct avrInstructionDisasm *instrDisasm = (struct avrInstructionDisasm *)instr->instructionDisasm;
-
-    /* Print the mnemonic */
-    return fprintf(out, "%s\t", instrDisasm->instructionInfo->mnemonic);
-}
-
-int avr_instruction_print_operands(struct instruction *instr, FILE *out, int flags) {
+int avr_instruction_print(struct instruction *instr, FILE *out, int flags) {
     struct avrInstructionDisasm *instrDisasm = (struct avrInstructionDisasm *)instr->instructionDisasm;
     int i;
 
+    /* Print an address label if we're outputting assembly */
+    if (flags & PRINT_FLAG_ASSEMBLY) {
+        if (fprintf(out, "%s%*x:\t", AVR_PREFIX_ADDRESS_LABEL, AVR_ADDRESS_WIDTH, instr->address) < 0)
+            return -1;
+
+    /* Print address */
+    } else if (flags & PRINT_FLAG_ADDRESSES) {
+        if (fprintf(out, "%*x:\t", AVR_ADDRESS_WIDTH, instr->address) < 0)
+            return -1;
+    }
+
+    /* Print original opcodes */
+    if (flags & PRINT_FLAG_OPCODES) {
+        if (instrDisasm->instructionInfo->width == 1) {
+            if (fprintf(out, "%02x         \t", instrDisasm->opcode[0]) < 0)
+                return -1;
+        } else if (instrDisasm->instructionInfo->width == 2) {
+            if (fprintf(out, "%02x %02x      \t", instrDisasm->opcode[1], instrDisasm->opcode[0]) < 0)
+                return -1;
+        } else if (instrDisasm->instructionInfo->width == 4) {
+            if (fprintf(out, "%02x %02x %02x %02x\t", instrDisasm->opcode[3], instrDisasm->opcode[2], instrDisasm->opcode[1], instrDisasm->opcode[0]) < 0)
+                return -1;
+        }
+    }
+
+    /* Print mnemonic */
+    if (fprintf(out, "%s\t", instrDisasm->instructionInfo->mnemonic) < 0)
+        return -1;
+
+    /* Print operands */
     for (i = 0; i < instrDisasm->instructionInfo->numOperands; i++) {
         /* Print dat comma, yea */
         if (i > 0 && i < instrDisasm->instructionInfo->numOperands) {
@@ -204,19 +172,13 @@ int avr_instruction_print_operands(struct instruction *instr, FILE *out, int fla
         }
     }
 
-    return 0;
-}
-
-int avr_instruction_print_comment(struct instruction *instr, FILE *out, int flags) {
-    struct avrInstructionDisasm *instrDisasm = (struct avrInstructionDisasm *)instr->instructionDisasm;
-    int i;
-
-    /* Print the destination address comment */
-    if (flags & PRINT_FLAG_DEST_ADDR_COMMENT) {
+    /* Print destination address comment */
+    if (flags & PRINT_FLAG_DESTINATION_COMMENT) {
         for (i = 0; i < instrDisasm->instructionInfo->numOperands; i++) {
             if ( instrDisasm->instructionInfo->operandTypes[i] == OPERAND_BRANCH_ADDRESS ||
                  instrDisasm->instructionInfo->operandTypes[i] == OPERAND_RELATIVE_ADDRESS) {
-                return fprintf(out, "\t; %s%x", AVR_PREFIX_ABSOLUTE_ADDRESS, instrDisasm->operandDisasms[i] + instrDisasm->address + 2);
+                if (fprintf(out, "\t; %s%x", AVR_PREFIX_ABSOLUTE_ADDRESS, instrDisasm->operandDisasms[i] + instrDisasm->address + 2) < 0)
+                    return -1;
             }
         }
     }

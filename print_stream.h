@@ -27,6 +27,8 @@ struct PrintStream {
 struct print_stream_state {
     /* Print Option Bit Flags */
     unsigned int flags;
+    /* Origin Initiailized */
+    int origin_initialized;
     /* Next Expected address */
     uint32_t expected_address;
 };
@@ -35,12 +37,11 @@ struct print_stream_state {
 enum {
     PRINT_FLAG_ASSEMBLY                = (1<<0),
     PRINT_FLAG_ADDRESSES               = (1<<1),
-    PRINT_FLAG_DEST_ADDR_COMMENT       = (1<<2),
+    PRINT_FLAG_DESTINATION_COMMENT     = (1<<2),
     PRINT_FLAG_DATA_HEX                = (1<<3),
     PRINT_FLAG_DATA_BIN                = (1<<4),
     PRINT_FLAG_DATA_DEC                = (1<<5),
     PRINT_FLAG_OPCODES                 = (1<<6),
-    PRINT_FLAG_INITIALIZED             = (1<<31),
 };
 
 /* Print Stream Support */

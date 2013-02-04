@@ -64,35 +64,20 @@ int print_stream_read(struct PrintStream *self, FILE *out) {
             return STREAM_ERROR_INPUT;
     }
 
-    /* If this is the very first instruction, or there is a discontinuity in the
-     * instruction address, drop an origin directive */
-    if (!(state->flags & PRINT_FLAG_INITIALIZED) || instr.address != state->expected_address) {
+    /* If this is the very first instruction, or there is a discontinuity in
+     * the instruction address */
+    if (!(state->origin_initialized) || instr.address != state->expected_address) {
+        /* Print an origin directive if we're outputting assembly */
         if (instr.print_origin(&instr, out, state->flags) < 0)
             goto fprintf_error;
-        state->flags |= PRINT_FLAG_INITIALIZED;
+        state->origin_initialized = 1;
     }
 
     /* Update next expected address */
     state->expected_address = instr.address + instr.width;
 
-    /* Print an address or address label */
-    if (instr.print_address(&instr, out, state->flags) < 0)
-        goto fprintf_error;
-
-    /* Print original opcodes */
-    if (instr.print_opcodes(&instr, out, state->flags) < 0)
-        goto fprintf_error;
-
-    /* Print instruction mnemonic */
-    if (instr.print_mnemonic(&instr, out, state->flags) < 0)
-        goto fprintf_error;
-
-    /* Print instruction operands */
-    if (instr.print_operands(&instr, out, state->flags) < 0)
-        goto fprintf_error;
-
-    /* Print any comment (e.g. destination address) */
-    if (instr.print_comment(&instr, out, state->flags) < 0)
+    /* Print the instruction */
+    if (instr.print(&instr, out, state->flags) < 0)
         goto fprintf_error;
 
     /* Print a newline */

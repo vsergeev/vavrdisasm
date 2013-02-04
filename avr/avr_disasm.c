@@ -212,11 +212,7 @@ int disasm_stream_avr_read(struct DisasmStream *self, struct instruction *instr)
 
     /* Fill default print functions in instruction structure */
     instr->print_origin = avr_instruction_print_origin;
-    instr->print_address = avr_instruction_print_address;
-    instr->print_opcodes = avr_instruction_print_opcodes;
-    instr->print_mnemonic = avr_instruction_print_mnemonic;
-    instr->print_operands = avr_instruction_print_operands;
-    instr->print_comment = avr_instruction_print_comment;
+    instr->print = avr_instruction_print;
 
     for (decodeAttempts = 0; decodeAttempts < 5; decodeAttempts++) {
         /* Count the number of consective bytes in our opcode buffer */
