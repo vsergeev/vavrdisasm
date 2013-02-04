@@ -7,8 +7,11 @@
 #include <disasm_stream.h>
 #include <print_stream.h>
 
+/* File Support */
+#include "file/file_support.h"
+
 /* AVR Support */
-#include "avr/avr.h"
+#include "avr/avr_support.h"
 
 /* Supported file types */
 enum {
@@ -27,6 +30,7 @@ enum {
 static int no_addresses = 0;            /* Flag for --no-addresses */
 static int no_destination_comments = 0; /* Flag for --no-destination-comments */
 static int no_opcodes = 0;              /* Flag for --no-opcodes */
+static int assembly = 0;                /* Flag for --assembly */
 static int data_base = 0;               /* Base of data constants (hexadecimal, binary, decimal) */
 
 /* Supported data constant bases */
@@ -37,9 +41,9 @@ enum {
 };
 
 static struct option long_options[] = {
-    {"address-label", required_argument, NULL, 'l'},
     {"file-type", required_argument, NULL, 't'},
     {"out-file", required_argument, NULL, 'o'},
+    {"assembly", no_argument, &assembly, 1},
     {"data-base-hex", no_argument, &data_base, DATA_BASE_HEX},
     {"data-base-bin", no_argument, &data_base, DATA_BASE_BIN},
     {"data-base-dec", no_argument, &data_base, DATA_BASE_DEC},
@@ -61,8 +65,7 @@ static void printUsage(const char *programName) {
 \n\
   -t, --file-type <type>        Specify file type of the program file.\n\
 \n\
-  -l, --address-label <prefix>  Create ghetto address labels with\n\
-                                  the specified label prefix.\n\
+  --assembly                    Produce assemble-able code with address labels.\n\
 \n\
   --data-base-hex               Represent data constants in hexadecimal\n\
                                   (default).\n\
@@ -111,15 +114,15 @@ void print_stream_error_trace(struct PrintStream *ps, struct DisasmStream *ds, s
 int main(int argc, const char *argv[]) {
     /* User Options */
     int optc;
+    char arch_str[16] = {0};
     char file_type_str[8] = {0};
-    char file_out_path[4096] = {0};
-    int file_type = 0;
-    char format_address_label[8] = {0};
+    char file_out_str[4096] = {0};
 
     /* Input / Output files */
     FILE *file_in = NULL, *file_out = NULL;
 
     /* Disassembler Streams */
+    int file_type = 0;
     int arch = ARCH_AVR8;
     struct ByteStream bs;
     struct DisasmStream ds;
@@ -135,15 +138,15 @@ int main(int argc, const char *argv[]) {
             /* Long option */
             case 0:
                 break;
-            case 'l':
-                strncpy(format_address_label, optarg, sizeof(format_address_label));
+            case 'a':
+                strncpy(arch_str, optarg, sizeof(arch_str));
                 break;
             case 't':
                 strncpy(file_type_str, optarg, sizeof(file_type_str));
                 break;
             case 'o':
                 if (strcmp(optarg, "-") != 0)
-                    strncpy(file_out_path, optarg, sizeof(file_out_path));
+                    strncpy(file_out_str, optarg, sizeof(file_out_str));
                 break;
             case 'h':
                 printUsage(argv[0]);
@@ -219,8 +222,8 @@ int main(int argc, const char *argv[]) {
     /*** Open output file ***/
 
     /* If an output file was specified */
-    if (file_out_path[0] != '\0') {
-        file_out = fopen(file_out_path, "w");
+    if (file_out_str[0] != '\0') {
+        file_out = fopen(file_out_str, "w");
         if (file_out == NULL) {
             perror("Error opening output file for writing");
             goto cleanup_exit_failure;
@@ -285,11 +288,9 @@ int main(int argc, const char *argv[]) {
 
     /* Setup the Print Stream */
     ps.in = &ds;
-    if (arch == ARCH_AVR8) {
-        ps.stream_init = print_stream_avr_init;
-        ps.stream_close = print_stream_avr_close;
-        ps.stream_read = print_stream_avr_read;
-    }
+    ps.stream_init = print_stream_init;
+    ps.stream_close = print_stream_close;
+    ps.stream_read = print_stream_read;
 
     /* Initialize streams */
     if ((ret = ps.stream_init(&ps)) < 0) {
@@ -298,26 +299,23 @@ int main(int argc, const char *argv[]) {
         goto cleanup_exit_failure;
     }
 
-    /* Load options into the Print Stream */
-    if (arch == ARCH_AVR8) {
-        struct print_stream_avr_state *options = (struct print_stream_avr_state *)ps.state;
-        if (!no_addresses)
-            options->flags |= AVR_PRINT_FLAG_ADDRESSES;
-        if (!no_destination_comments)
-            options->flags |= AVR_PRINT_FLAG_DEST_ADDR_COMMENT;
-        if (!no_opcodes)
-            options->flags |= AVR_PRINT_FLAG_OPCODES;
-        if (data_base == DATA_BASE_BIN)
-            options->flags |= AVR_PRINT_FLAG_DATA_BIN;
-        else if (data_base == DATA_BASE_DEC)
-            options->flags|= AVR_PRINT_FLAG_DATA_DEC;
-        else
-            options->flags |= AVR_PRINT_FLAG_DATA_HEX;
-        if (format_address_label[0] != '\0') {
-            options->flags |= AVR_PRINT_FLAG_ADDRESS_LABELS;
-            strncpy(options->address_label_prefix, format_address_label, sizeof(options->address_label_prefix));
-        }
-    }
+    /* Load option flags into the Print Stream */
+    if (!no_addresses)
+        ((struct print_stream_state *)ps.state)->flags |= PRINT_FLAG_ADDRESSES;
+    if (!no_destination_comments)
+        ((struct print_stream_state *)ps.state)->flags |= PRINT_FLAG_DEST_ADDR_COMMENT;
+    if (!no_opcodes)
+        ((struct print_stream_state *)ps.state)->flags |= PRINT_FLAG_OPCODES;
+
+    if (data_base == DATA_BASE_BIN)
+        ((struct print_stream_state *)ps.state)->flags |= PRINT_FLAG_DATA_BIN;
+    else if (data_base == DATA_BASE_DEC)
+        ((struct print_stream_state *)ps.state)->flags|= PRINT_FLAG_DATA_DEC;
+    else
+        ((struct print_stream_state *)ps.state)->flags |=PRINT_FLAG_DATA_HEX;
+
+    if (assembly)
+        ((struct print_stream_state *)ps.state)->flags |=PRINT_FLAG_ASSEMBLY;
 
     /* Read from Print Stream until EOF */
     while ( (ret = ps.stream_read(&ps, file_out)) != STREAM_EOF ) {

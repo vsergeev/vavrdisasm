@@ -2,8 +2,10 @@
 #define PRINT_STREAM_H
 
 #include <stdint.h>
-#include "disasm_stream.h"
-#include "stream_error.h"
+#include <stdio.h>
+#include <disasm_stream.h>
+#include <stream_error.h>
+#include <instruction.h>
 
 struct PrintStream {
     /* Input stream */
@@ -20,6 +22,31 @@ struct PrintStream {
     /* Output function */
     int (*stream_read)(struct PrintStream *self, FILE *out);
 };
+
+/* Print Stream State */
+struct print_stream_state {
+    /* Print Option Bit Flags */
+    unsigned int flags;
+    /* Next Expected address */
+    uint32_t expected_address;
+};
+
+/* Print Stream Option Flags */
+enum {
+    PRINT_FLAG_ASSEMBLY                = (1<<0),
+    PRINT_FLAG_ADDRESSES               = (1<<1),
+    PRINT_FLAG_DEST_ADDR_COMMENT       = (1<<2),
+    PRINT_FLAG_DATA_HEX                = (1<<3),
+    PRINT_FLAG_DATA_BIN                = (1<<4),
+    PRINT_FLAG_DATA_DEC                = (1<<5),
+    PRINT_FLAG_OPCODES                 = (1<<6),
+    PRINT_FLAG_INITIALIZED             = (1<<31),
+};
+
+/* Print Stream Support */
+int print_stream_init(struct PrintStream *self);
+int print_stream_close(struct PrintStream *self);
+int print_stream_read(struct PrintStream *self, FILE *out);
 
 #endif
 

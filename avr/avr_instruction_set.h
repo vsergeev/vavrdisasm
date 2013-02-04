@@ -11,7 +11,7 @@
 #define AVR_ISET_INDEX_BYTE     (AVR_TOTAL_INSTRUCTIONS-1)
 
 /* Enumeration for all types of AVR Operands */
-enum AVR_Operand_Types {
+enum {
     OPERAND_NONE,
     OPERAND_REGISTER, OPERAND_REGISTER_STARTR16,
     OPERAND_REGISTER_EVEN_PAIR, OPERAND_REGISTER_EVEN_PAIR_STARTR24,
@@ -23,7 +23,7 @@ enum AVR_Operand_Types {
     OPERAND_RAW_WORD, OPERAND_RAW_BYTE,
 };
 
-/* Structure for each instruction entry in the instruction set */
+/* Structure for each entry in the instruction set */
 struct avrInstructionInfo {
     char mnemonic[7];
     uint16_t instructionMask;
@@ -37,7 +37,7 @@ struct avrInstructionDisasm {
     uint32_t address;
     uint8_t opcode[4];
     unsigned int width;
-    struct avrInstructionInfo *instructionSetEntry;
+    struct avrInstructionInfo *instructionInfo;
     int32_t operandDisasms[AVR_MAX_NUM_OPERANDS];
 };
 

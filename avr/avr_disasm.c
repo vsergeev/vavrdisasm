@@ -3,11 +3,12 @@
 #include <string.h>
 #include <stdio.h>
 
-#include <stream_error.h>
 #include <byte_stream.h>
 #include <disasm_stream.h>
+#include <instruction.h>
 
 #include "avr_instruction_set.h"
+#include "avr_support.h"
 
 /******************************************************************************/
 /* AVR Disassembly Stream Support */
@@ -20,6 +21,8 @@ struct disasm_stream_avr_state {
     unsigned int len;
     /* EOF encountered flag */
     int eof;
+    /* Disassembled instruction */
+    struct avrInstructionDisasm instrDisasm;
 };
 
 int disasm_stream_avr_init(struct DisasmStream *self) {
@@ -202,11 +205,18 @@ static int32_t util_disasm_operand(uint32_t operand, int operandType) {
     return operandDisasm;
 }
 
-int disasm_stream_avr_read(struct DisasmStream *self, void *idisasm) {
+int disasm_stream_avr_read(struct DisasmStream *self, struct instruction *instr) {
     struct disasm_stream_avr_state *state = (struct disasm_stream_avr_state *)self->state;
-    struct avrInstructionDisasm *instrDisasm = (struct avrInstructionDisasm *)idisasm;
 
     int decodeAttempts, lenConsecutive;
+
+    /* Fill default print functions in instruction structure */
+    instr->print_origin = avr_instruction_print_origin;
+    instr->print_address = avr_instruction_print_address;
+    instr->print_opcodes = avr_instruction_print_opcodes;
+    instr->print_mnemonic = avr_instruction_print_mnemonic;
+    instr->print_operands = avr_instruction_print_operands;
+    instr->print_comment = avr_instruction_print_comment;
 
     for (decodeAttempts = 0; decodeAttempts < 5; decodeAttempts++) {
         /* Count the number of consective bytes in our opcode buffer */
@@ -221,27 +231,33 @@ int disasm_stream_avr_read(struct DisasmStream *self, void *idisasm) {
             /* One lone byte at some address or at EOF */
         if (lenConsecutive == 1 && (state->len > 1 || state->eof)) {
             /* Decode a raw .DB byte "instruction" */
-            memset(instrDisasm, 0, sizeof(struct avrInstructionDisasm));
-            instrDisasm->address = state->address[0];
-            instrDisasm->opcode[0] = state->data[0];
-            instrDisasm->instructionSetEntry = &AVR_Instruction_Set[AVR_ISET_INDEX_BYTE];
-            instrDisasm->operandDisasms[0] = (int32_t)state->data[0];
-            instrDisasm->width = 1;
+            memset(&(state->instrDisasm), 0, sizeof(struct avrInstructionDisasm));
+            state->instrDisasm.address = state->address[0];
+            state->instrDisasm.opcode[0] = state->data[0];
+            state->instrDisasm.instructionInfo = &AVR_Instruction_Set[AVR_ISET_INDEX_BYTE];
+            state->instrDisasm.operandDisasms[0] = (int32_t)state->data[0];
+            state->instrDisasm.width = 1;
             /* Shift out the processed byte(s) from our opcode buffer */
             util_opbuffer_shift(state, 1);
+
+            /* Fill the instruction structure */
+            instr->instructionDisasm = (void *)&(state->instrDisasm);
+            instr->address = state->instrDisasm.address;
+            instr->width = state->instrDisasm.width;
             return 0;
         }
 
         /* Two or more consecutive bytes */
         if (lenConsecutive >= 2) {
-            uint16_t opcode; uint32_t operand;
-            struct avrInstructionInfo *instruction;
+            uint16_t opcode;
+            uint32_t operand;
+            struct avrInstructionInfo *instructionInfo;
             int i;
 
             /* Assemble the 16-bit opcode from little-endian input */
             opcode = (uint16_t)(state->data[1] << 8) | (uint16_t)(state->data[0]);
             /* Look up the instruction in our instruction set */
-            if ( (instruction = util_iset_lookup_by_opcode(opcode)) == NULL) {
+            if ( (instructionInfo = util_iset_lookup_by_opcode(opcode)) == NULL) {
                 /* This should never happen because of the .DW instruction that
                  * matches any 16-bit opcode */
                 self->error = "Error, catastrophic failure! Malformed instruction set!";
@@ -249,50 +265,62 @@ int disasm_stream_avr_read(struct DisasmStream *self, void *idisasm) {
             }
 
             /* If this is a 16-bit wide instruction */
-            if (instruction->operandTypes[0] != OPERAND_LONG_ABSOLUTE_ADDRESS &&
-                instruction->operandTypes[1] != OPERAND_LONG_ABSOLUTE_ADDRESS) {
-                /* Decode and return the 16-bit instruction */
-                memset(instrDisasm, 0, sizeof(struct avrInstructionDisasm));
-                instrDisasm->address = state->address[0];
-                instrDisasm->opcode[0] = state->data[0]; instrDisasm->opcode[1] = state->data[1];
-                instrDisasm->width = 2;
-                instrDisasm->instructionSetEntry = instruction;
+            if (instructionInfo->operandTypes[0] != OPERAND_LONG_ABSOLUTE_ADDRESS &&
+                instructionInfo->operandTypes[1] != OPERAND_LONG_ABSOLUTE_ADDRESS) {
+                /* Decode and return a 16-bit instruction */
+                memset(&(state->instrDisasm), 0, sizeof(struct avrInstructionDisasm));
+                state->instrDisasm.address = state->address[0];
+                state->instrDisasm.opcode[0] = state->data[0]; state->instrDisasm.opcode[1] = state->data[1];
+                state->instrDisasm.width = 2;
+                state->instrDisasm.instructionInfo = instructionInfo;
                 /* Disassemble the operands */
-                for (i = 0; i < instruction->numOperands; i++) {
+                for (i = 0; i < instructionInfo->numOperands; i++) {
                     /* Extract the operand bits */
-                    operand = util_bits_data_from_mask(opcode, instruction->operandMasks[i]);
+                    operand = util_bits_data_from_mask(opcode, instructionInfo->operandMasks[i]);
                     /* Disassemble the operand */
-                    instrDisasm->operandDisasms[i] = util_disasm_operand(operand, instruction->operandTypes[i]);
+                    state->instrDisasm.operandDisasms[i] = util_disasm_operand(operand, instructionInfo->operandTypes[i]);
                 }
                 /* Shift out the processed byte(s) from our opcode buffer */
                 util_opbuffer_shift(state, 2);
+
+                /* Fill the instruction structure */
+                instr->instructionDisasm = (void *)&(state->instrDisasm);
+                instr->address = state->instrDisasm.address;
+                instr->width = state->instrDisasm.width;
+
                 return 0;
 
             /* Else, this is a 32-bit wide instruction */
             } else {
                 /* We have read the complete 32-bit instruction */
                 if (lenConsecutive == 4) {
-                    /* Decode and return the 32-bit instruction */
-                    memset(instrDisasm, 0, sizeof(struct avrInstructionDisasm));
-                    instrDisasm->address = state->address[0];
-                    instrDisasm->opcode[0] = state->data[0]; instrDisasm->opcode[1] = state->data[1];
-                    instrDisasm->opcode[2] = state->data[2]; instrDisasm->opcode[3] = state->data[3];
-                    instrDisasm->width = 4;
-                    instrDisasm->instructionSetEntry = instruction;
+                    /* Decode a 32-bit instruction */
+                    memset(&(state->instrDisasm), 0, sizeof(struct avrInstructionDisasm));
+                    state->instrDisasm.address = state->address[0];
+                    state->instrDisasm.opcode[0] = state->data[0]; state->instrDisasm.opcode[1] = state->data[1];
+                    state->instrDisasm.opcode[2] = state->data[2]; state->instrDisasm.opcode[3] = state->data[3];
+                    state->instrDisasm.width = 4;
+                    state->instrDisasm.instructionInfo = instructionInfo;
                     /* Disassemble the operands */
-                    for (i = 0; i < instruction->numOperands; i++) {
+                    for (i = 0; i < instructionInfo->numOperands; i++) {
                         /* Extract the operand bits */
-                        operand = util_bits_data_from_mask(opcode, instruction->operandMasks[i]);
+                        operand = util_bits_data_from_mask(opcode, instructionInfo->operandMasks[i]);
 
                         /* Append the extra bits if it's a long operand */
-                        if (instruction->operandTypes[i] == OPERAND_LONG_ABSOLUTE_ADDRESS)
+                        if (instructionInfo->operandTypes[i] == OPERAND_LONG_ABSOLUTE_ADDRESS)
                             operand = (uint32_t)(operand << 16) | (uint32_t)(state->data[3] << 8) | (uint32_t)(state->data[2]);
 
                         /* Disassemble the operand */
-                        instrDisasm->operandDisasms[i] = util_disasm_operand(operand, instruction->operandTypes[i]);
+                        state->instrDisasm.operandDisasms[i] = util_disasm_operand(operand, instructionInfo->operandTypes[i]);
                     }
                     /* Shift out the processed byte(s) from our opcode buffer */
                     util_opbuffer_shift(state, 4);
+
+                    /* Fill the instruction structure */
+                    instr->instructionDisasm = (void *)&(state->instrDisasm);
+                    instr->address = state->instrDisasm.address;
+                    instr->width = state->instrDisasm.width;
+
                     return 0;
 
                 /* Edge case: when input stream changes address with 3 or 2
@@ -302,14 +330,26 @@ int disasm_stream_avr_read(struct DisasmStream *self, void *idisasm) {
                 } else if ((lenConsecutive == 3 && (state->len > 3 || state->eof)) ||
                            (lenConsecutive == 2 && (state->len > 2 || state->eof))) {
                     /* Return a raw .DW word "instruction" */
-                    memset(instrDisasm, 0, sizeof(struct avrInstructionDisasm));
-                    instrDisasm->address = state->address[0];
-                    instrDisasm->opcode[0] = state->data[0]; instrDisasm->opcode[1] = state->data[1];
-                    instrDisasm->width = 2;
-                    instrDisasm->instructionSetEntry = &AVR_Instruction_Set[AVR_ISET_INDEX_WORD];
-                    instrDisasm->operandDisasms[0] = (uint16_t)(state->data[1] << 8) | (uint16_t)state->data[0];
+                    memset(&(state->instrDisasm), 0, sizeof(struct avrInstructionDisasm));
+                    state->instrDisasm.address = state->address[0];
+                    state->instrDisasm.opcode[0] = state->data[0]; state->instrDisasm.opcode[1] = state->data[1];
+                    state->instrDisasm.width = 2;
+                    state->instrDisasm.instructionInfo = &AVR_Instruction_Set[AVR_ISET_INDEX_WORD];
+                    /* Disassemble the operands */
+                    for (i = 0; i < instructionInfo->numOperands; i++) {
+                        /* Extract the operand bits */
+                        operand = util_bits_data_from_mask(opcode, instructionInfo->operandMasks[i]);
+                        /* Disassemble the operand */
+                        state->instrDisasm.operandDisasms[i] = util_disasm_operand(operand, instructionInfo->operandTypes[i]);
+                    }
                     /* Shift out the processed byte(s) from our opcode buffer */
                     util_opbuffer_shift(state, 2);
+
+                    /* Fill the instruction structure */
+                    instr->instructionDisasm = (void *)&(state->instrDisasm);
+                    instr->address = state->instrDisasm.address;
+                    instr->width = state->instrDisasm.width;
+
                     return 0;
                 }
 
@@ -317,25 +357,19 @@ int disasm_stream_avr_read(struct DisasmStream *self, void *idisasm) {
             }
         }
 
-        uint8_t readData; uint32_t readAddr; unsigned int readLen;
+        uint8_t readData;
+        uint32_t readAddr;
         int ret;
 
         /* Read the next data byte from the opcode stream */
-        ret = self->in->stream_read(self->in, &readData, &readAddr, &readLen, 1);
-        switch (ret) {
-            case 0:
-                break;
-            case STREAM_EOF:
-                /* Record encountered EOF */
-                state->eof = 1;
-                break;
-            default:
-                self->error = "Error in opcode stream read!";
-                return STREAM_ERROR_INPUT;
-        }
-
-        /* If we successfully read a byte */
-        if (readLen) {
+        ret = self->in->stream_read(self->in, &readData, &readAddr);
+        if (ret == STREAM_EOF) {
+            /* Record encountered EOF */
+            state->eof = 1;
+        } else if (ret < 0) {
+            self->error = "Error in opcode stream read!";
+            return STREAM_ERROR_INPUT;
+        } else if (ret == 0) {
             /* If we have an opcode buffer overflow (this should never happen
              * if the decoding logic above is correct) */
             if (state->len == sizeof(state->data)) {
