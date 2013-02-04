@@ -124,6 +124,7 @@ int main(int argc, const char *argv[]) {
     /* Disassembler Streams */
     int file_type = 0;
     int arch = ARCH_AVR8;
+    int flags;
     struct ByteStream bs;
     struct DisasmStream ds;
     struct PrintStream ps;
@@ -256,6 +257,24 @@ int main(int argc, const char *argv[]) {
         goto cleanup_exit_success;
     #endif
 
+    /*** Setup Formatting Flags ***/
+    if (!no_addresses)
+        flags |= PRINT_FLAG_ADDRESSES;
+    if (!no_destination_comments)
+        flags |= PRINT_FLAG_DEST_ADDR_COMMENT;
+    if (!no_opcodes)
+        flags |= PRINT_FLAG_OPCODES;
+
+    if (data_base == DATA_BASE_BIN)
+        flags |= PRINT_FLAG_DATA_BIN;
+    else if (data_base == DATA_BASE_DEC)
+        flags |= PRINT_FLAG_DATA_DEC;
+    else
+        flags |= PRINT_FLAG_DATA_HEX;
+
+    if (assembly)
+        flags |= PRINT_FLAG_ASSEMBLY;
+
     /*** Setup disassembler streams ***/
 
     /* Setup the Byte Stream */
@@ -293,29 +312,11 @@ int main(int argc, const char *argv[]) {
     ps.stream_read = print_stream_read;
 
     /* Initialize streams */
-    if ((ret = ps.stream_init(&ps)) < 0) {
+    if ((ret = ps.stream_init(&ps, flags)) < 0) {
         fprintf(stderr, "Error initializing streams! Error code: %d\n", ret);
         print_stream_error_trace(&ps, &ds, &bs);
         goto cleanup_exit_failure;
     }
-
-    /* Load option flags into the Print Stream */
-    if (!no_addresses)
-        ((struct print_stream_state *)ps.state)->flags |= PRINT_FLAG_ADDRESSES;
-    if (!no_destination_comments)
-        ((struct print_stream_state *)ps.state)->flags |= PRINT_FLAG_DEST_ADDR_COMMENT;
-    if (!no_opcodes)
-        ((struct print_stream_state *)ps.state)->flags |= PRINT_FLAG_OPCODES;
-
-    if (data_base == DATA_BASE_BIN)
-        ((struct print_stream_state *)ps.state)->flags |= PRINT_FLAG_DATA_BIN;
-    else if (data_base == DATA_BASE_DEC)
-        ((struct print_stream_state *)ps.state)->flags|= PRINT_FLAG_DATA_DEC;
-    else
-        ((struct print_stream_state *)ps.state)->flags |=PRINT_FLAG_DATA_HEX;
-
-    if (assembly)
-        ((struct print_stream_state *)ps.state)->flags |=PRINT_FLAG_ASSEMBLY;
 
     /* Read from Print Stream until EOF */
     while ( (ret = ps.stream_read(&ps, file_out)) != STREAM_EOF ) {

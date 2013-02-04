@@ -10,7 +10,7 @@
 /* Print Stream Support */
 /******************************************************************************/
 
-int print_stream_init(struct PrintStream *self) {
+int print_stream_init(struct PrintStream *self, int flags) {
     /* Allocate stream state */
     self->state = malloc(sizeof(struct print_stream_state));
     if (self->state == NULL) {
@@ -20,6 +20,7 @@ int print_stream_init(struct PrintStream *self) {
 
     /* Initialize stream state */
     memset(self->state, 0, sizeof(struct print_stream_state));
+    ((struct print_stream_state *)self->state)->flags = flags;
 
     /* Reset the error to NULL */
     self->error = NULL;

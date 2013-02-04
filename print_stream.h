@@ -16,7 +16,7 @@ struct PrintStream {
     char *error;
 
     /* Init function */
-    int (*stream_init)(struct PrintStream *self);
+    int (*stream_init)(struct PrintStream *self, int flags);
     /* Close function */
     int (*stream_close)(struct PrintStream *self);
     /* Output function */
@@ -44,7 +44,7 @@ enum {
 };
 
 /* Print Stream Support */
-int print_stream_init(struct PrintStream *self);
+int print_stream_init(struct PrintStream *self, int flags);
 int print_stream_close(struct PrintStream *self);
 int print_stream_read(struct PrintStream *self, FILE *out);
 
