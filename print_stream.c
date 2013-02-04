@@ -66,7 +66,7 @@ int print_stream_read(struct PrintStream *self, FILE *out) {
 
     /* If this is the very first instruction, or there is a discontinuity in
      * the instruction address */
-    if (!(state->origin_initialized) || instr.address != state->expected_address) {
+    if (!(state->origin_initialized) || instr.address != state->next_address) {
         /* Print an origin directive if we're outputting assembly */
         if (instr.print_origin(&instr, out, state->flags) < 0)
             goto fprintf_error;
@@ -74,7 +74,7 @@ int print_stream_read(struct PrintStream *self, FILE *out) {
     }
 
     /* Update next expected address */
-    state->expected_address = instr.address + instr.width;
+    state->next_address = instr.address + instr.width;
 
     /* Print the instruction */
     if (instr.print(&instr, out, state->flags) < 0)

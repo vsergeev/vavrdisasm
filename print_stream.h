@@ -30,7 +30,7 @@ struct print_stream_state {
     /* Origin Initiailized */
     int origin_initialized;
     /* Next Expected address */
-    uint32_t expected_address;
+    uint32_t next_address;
 };
 
 /* Print Stream Option Flags */

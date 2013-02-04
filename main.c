@@ -19,11 +19,13 @@ enum {
     FILE_TYPE_INTEL_HEX,
     FILE_TYPE_MOTOROLA_SRECORD,
     FILE_TYPE_BINARY,
+    FILE_TYPE_ASCII_HEX,
 };
 
 /* Supported architectures */
 enum {
     ARCH_AVR8,
+    ARCH_PIC_MIDRANGE,
 };
 
 /* getopt flags for some long options that don't have a short option equivalent */
@@ -84,7 +86,8 @@ static void printUsage(const char *programName) {
   Atmel Generic             generic\n\
   Intel HEX8                ihex\n\
   Motorola S-Record         srec\n\
-  Raw Binary                binary\n\n");
+  Raw Binary                binary\n\
+  ASCII Hex                 ascii\n\n");
 }
 
 static void printVersion(void) {
@@ -108,7 +111,7 @@ void print_stream_error_trace(struct PrintStream *ps, struct DisasmStream *ds, s
     else
         fprintf(stderr, "\tByte Stream Error: %s\n", bs->error);
 
-    fprintf(stderr, "\tPlease file an issue at https://github.com/vsergeev/vAVRdisasm/issues\n\tor email the author!");
+    fprintf(stderr, "\tPlease file an issue at https://github.com/vsergeev/vAVRdisasm/issues\n\tor email the author!\n\n");
 }
 
 int main(int argc, const char *argv[]) {
@@ -192,6 +195,8 @@ int main(int argc, const char *argv[]) {
             file_type = FILE_TYPE_INTEL_HEX;
         else if (strcasecmp(file_type_str, "srec") == 0)
             file_type = FILE_TYPE_MOTOROLA_SRECORD;
+        else if (strcasecmp(file_type_str, "ascii") == 0)
+            file_type = FILE_TYPE_ASCII_HEX;
         else if (strcasecmp(file_type_str, "binary") == 0)
             file_type = FILE_TYPE_BINARY;
         else {
@@ -291,6 +296,10 @@ int main(int argc, const char *argv[]) {
         bs.stream_init = byte_stream_srecord_init;
         bs.stream_close = byte_stream_srecord_close;
         bs.stream_read = byte_stream_srecord_read;
+    } else if (file_type == FILE_TYPE_ASCII_HEX) {
+        bs.stream_init = byte_stream_asciihex_init;
+        bs.stream_close = byte_stream_asciihex_close;
+        bs.stream_read = byte_stream_asciihex_read;
     } else {
         bs.stream_init = byte_stream_binary_init;
         bs.stream_close = byte_stream_binary_close;

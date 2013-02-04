@@ -24,8 +24,11 @@
 #define AVR_ADDRESS_WIDTH               4
 
 int avr_instruction_print_origin(struct instruction *instr, FILE *out, int flags) {
-    if (fprintf(out, ".org %s%0*x\n", AVR_PREFIX_ABSOLUTE_ADDRESS, AVR_ADDRESS_WIDTH, instr->address) < 0)
-        return -1;
+    /* Print an origin directive if we're outputting assembly */
+    if (flags & PRINT_FLAG_ASSEMBLY) {
+        if (fprintf(out, ".org %s%0*x\n", AVR_PREFIX_ABSOLUTE_ADDRESS, AVR_ADDRESS_WIDTH, instr->address) < 0)
+            return -1;
+    }
     return 0;
 }
 
@@ -35,7 +38,7 @@ int avr_instruction_print(struct instruction *instr, FILE *out, int flags) {
 
     /* Print an address label if we're outputting assembly */
     if (flags & PRINT_FLAG_ASSEMBLY) {
-        if (fprintf(out, "%s%*x:\t", AVR_PREFIX_ADDRESS_LABEL, AVR_ADDRESS_WIDTH, instr->address) < 0)
+        if (fprintf(out, "%s%0*x:\t", AVR_PREFIX_ADDRESS_LABEL, AVR_ADDRESS_WIDTH, instr->address) < 0)
             return -1;
 
     /* Print address */
