@@ -69,15 +69,15 @@ int avr_instruction_print_opcodes(struct instruction *instr, FILE *out, int flag
     /* Print original opcodes, if we're not generating address labels */
     if (flags & PRINT_FLAG_OPCODES && !(flags & PRINT_FLAG_ASSEMBLY)) {
         /* If this is an 8-bit data byte */
-        if (instrDisasm->width == 1)
+        if (instrDisasm->instructionInfo->width == 1)
             return fprintf(out, "%02x         \t", instrDisasm->opcode[0]);
 
         /* If this is a 16-bit instruction */
-        else if (instrDisasm->width == 2)
+        else if (instrDisasm->instructionInfo->width == 2)
             return fprintf(out, "%02x %02x      \t", instrDisasm->opcode[1], instrDisasm->opcode[0]);
 
         /* If this is a 32-bit instruction */
-        else if (instrDisasm->width == 4)
+        else if (instrDisasm->instructionInfo->width == 4)
             return fprintf(out, "%02x %02x %02x %02x\t", instrDisasm->opcode[3], instrDisasm->opcode[2], instrDisasm->opcode[1], instrDisasm->opcode[0]);
     }
 

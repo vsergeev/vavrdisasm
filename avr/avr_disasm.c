@@ -236,14 +236,13 @@ int disasm_stream_avr_read(struct DisasmStream *self, struct instruction *instr)
             state->instrDisasm.opcode[0] = state->data[0];
             state->instrDisasm.instructionInfo = &AVR_Instruction_Set[AVR_ISET_INDEX_BYTE];
             state->instrDisasm.operandDisasms[0] = (int32_t)state->data[0];
-            state->instrDisasm.width = 1;
             /* Shift out the processed byte(s) from our opcode buffer */
             util_opbuffer_shift(state, 1);
 
             /* Fill the instruction structure */
             instr->instructionDisasm = (void *)&(state->instrDisasm);
             instr->address = state->instrDisasm.address;
-            instr->width = state->instrDisasm.width;
+            instr->width = state->instrDisasm.instructionInfo->width;
             return 0;
         }
 
@@ -265,13 +264,11 @@ int disasm_stream_avr_read(struct DisasmStream *self, struct instruction *instr)
             }
 
             /* If this is a 16-bit wide instruction */
-            if (instructionInfo->operandTypes[0] != OPERAND_LONG_ABSOLUTE_ADDRESS &&
-                instructionInfo->operandTypes[1] != OPERAND_LONG_ABSOLUTE_ADDRESS) {
+            if (instructionInfo->width == 2) {
                 /* Decode and return a 16-bit instruction */
                 memset(&(state->instrDisasm), 0, sizeof(struct avrInstructionDisasm));
                 state->instrDisasm.address = state->address[0];
                 state->instrDisasm.opcode[0] = state->data[0]; state->instrDisasm.opcode[1] = state->data[1];
-                state->instrDisasm.width = 2;
                 state->instrDisasm.instructionInfo = instructionInfo;
                 /* Disassemble the operands */
                 for (i = 0; i < instructionInfo->numOperands; i++) {
@@ -286,7 +283,7 @@ int disasm_stream_avr_read(struct DisasmStream *self, struct instruction *instr)
                 /* Fill the instruction structure */
                 instr->instructionDisasm = (void *)&(state->instrDisasm);
                 instr->address = state->instrDisasm.address;
-                instr->width = state->instrDisasm.width;
+                instr->width = state->instrDisasm.instructionInfo->width;
 
                 return 0;
 
@@ -299,7 +296,6 @@ int disasm_stream_avr_read(struct DisasmStream *self, struct instruction *instr)
                     state->instrDisasm.address = state->address[0];
                     state->instrDisasm.opcode[0] = state->data[0]; state->instrDisasm.opcode[1] = state->data[1];
                     state->instrDisasm.opcode[2] = state->data[2]; state->instrDisasm.opcode[3] = state->data[3];
-                    state->instrDisasm.width = 4;
                     state->instrDisasm.instructionInfo = instructionInfo;
                     /* Disassemble the operands */
                     for (i = 0; i < instructionInfo->numOperands; i++) {
@@ -319,7 +315,7 @@ int disasm_stream_avr_read(struct DisasmStream *self, struct instruction *instr)
                     /* Fill the instruction structure */
                     instr->instructionDisasm = (void *)&(state->instrDisasm);
                     instr->address = state->instrDisasm.address;
-                    instr->width = state->instrDisasm.width;
+                    instr->width = state->instrDisasm.instructionInfo->width;
 
                     return 0;
 
@@ -333,7 +329,6 @@ int disasm_stream_avr_read(struct DisasmStream *self, struct instruction *instr)
                     memset(&(state->instrDisasm), 0, sizeof(struct avrInstructionDisasm));
                     state->instrDisasm.address = state->address[0];
                     state->instrDisasm.opcode[0] = state->data[0]; state->instrDisasm.opcode[1] = state->data[1];
-                    state->instrDisasm.width = 2;
                     state->instrDisasm.instructionInfo = &AVR_Instruction_Set[AVR_ISET_INDEX_WORD];
                     /* Disassemble the operands */
                     for (i = 0; i < instructionInfo->numOperands; i++) {
@@ -348,7 +343,7 @@ int disasm_stream_avr_read(struct DisasmStream *self, struct instruction *instr)
                     /* Fill the instruction structure */
                     instr->instructionDisasm = (void *)&(state->instrDisasm);
                     instr->address = state->instrDisasm.address;
-                    instr->width = state->instrDisasm.width;
+                    instr->width = state->instrDisasm.instructionInfo->width;
 
                     return 0;
                 }

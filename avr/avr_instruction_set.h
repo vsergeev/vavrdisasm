@@ -3,9 +3,6 @@
 
 #include <stdint.h>
 
-/* Maximum number of operands */
-#define AVR_MAX_NUM_OPERANDS    2
-
 /* Indicies for the .DW and .DB raw word / byte "instructions" */
 #define AVR_ISET_INDEX_WORD     (AVR_TOTAL_INSTRUCTIONS-2)
 #define AVR_ISET_INDEX_BYTE     (AVR_TOTAL_INSTRUCTIONS-1)
@@ -26,19 +23,19 @@ enum {
 /* Structure for each entry in the instruction set */
 struct avrInstructionInfo {
     char mnemonic[7];
+    unsigned int width;
     uint16_t instructionMask;
     int numOperands;
-    uint16_t operandMasks[AVR_MAX_NUM_OPERANDS];
-    int operandTypes[AVR_MAX_NUM_OPERANDS];
+    uint16_t operandMasks[2];
+    int operandTypes[2];
 };
 
 /* Structure for a disassembled instruction */
 struct avrInstructionDisasm {
     uint32_t address;
     uint8_t opcode[4];
-    unsigned int width;
     struct avrInstructionInfo *instructionInfo;
-    int32_t operandDisasms[AVR_MAX_NUM_OPERANDS];
+    int32_t operandDisasms[2];
 };
 
 extern struct avrInstructionInfo AVR_Instruction_Set[];
