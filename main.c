@@ -12,6 +12,8 @@
 
 /* AVR Support */
 #include "avr/avr_support.h"
+/* PIC Support */
+#include "pic/pic_support.h"
 
 /* Supported file types */
 enum {
@@ -25,7 +27,9 @@ enum {
 /* Supported architectures */
 enum {
     ARCH_AVR8,
+    ARCH_PIC_BASELINE,
     ARCH_PIC_MIDRANGE,
+    ARCH_PIC_MIDRANGE_ENHANCED,
 };
 
 /* getopt flags for some long options that don't have a short option equivalent */
@@ -43,6 +47,7 @@ enum {
 };
 
 static struct option long_options[] = {
+    {"architecture", required_argument, NULL, 'a'},
     {"file-type", required_argument, NULL, 't'},
     {"out-file", required_argument, NULL, 'o'},
     {"assembly", no_argument, &assembly, 1},
@@ -58,11 +63,13 @@ static struct option long_options[] = {
 };
 
 static void printUsage(const char *programName) {
-    printf("Usage: %s <option(s)> <file>\n", programName);
+    printf("Usage: %s -a <architecture> [option(s)] <file>\n", programName);
     printf("Disassembles program file <file>. Use - for standard input.\n\n");
-    printf("vAVRdisasm version 3.0 - 02/01/2013.\n");
+    printf("ucdisasm version 1.0 - 02/04/2013.\n");
     printf("Written by Vanya A. Sergeev - <vsergeev@gmail.com>.\n\n");
     printf("Additional Options:\n\
+  -a, --architecture <arch>     Architecture to disassemble for.\n\
+\n\
   -o, --out-file <file>         Write to file instead of standard output.\n\
 \n\
   -t, --file-type <type>        Specify file type of the program file.\n\
@@ -82,6 +89,11 @@ static void printUsage(const char *programName) {
 \n\
   -h, --help                    Display this usage/help.\n\
   -v, --version                 Display the program's version.\n\n");
+    printf("Supported architectures:\n\
+  Atmel AVR8                avr\n\
+  PIC Baseline              pic-baseline\n\
+  PIC Midrange              pic-midrange\n\
+  PIC Midrange Enhanced     pic-enhanced\n\n");
     printf("Supported file types:\n\
   Atmel Generic             generic\n\
   Intel HEX8                ihex\n\
@@ -91,7 +103,7 @@ static void printUsage(const char *programName) {
 }
 
 static void printVersion(void) {
-    printf("vAVRdisasm version 3.0 - 02/01/2013.\n");
+    printf("ucdisasm version 1.0 - 02/04/2013.\n");
     printf("Written by Vanya Sergeev - <vsergeev@gmail.com>\n");
 }
 
@@ -126,7 +138,7 @@ int main(int argc, const char *argv[]) {
 
     /* Disassembler Streams */
     int file_type = 0;
-    int arch = ARCH_AVR8;
+    int arch = 0;
     int flags = 0;
     struct ByteStream bs;
     struct DisasmStream ds;
@@ -135,7 +147,7 @@ int main(int argc, const char *argv[]) {
 
     /* Parse command line options */
     while (1) {
-        optc = getopt_long(argc, (char * const *)argv, "o:t:l:hv", long_options, NULL);
+        optc = getopt_long(argc, (char * const *)argv, "a:o:t:l:hv", long_options, NULL);
         if (optc == -1)
             break;
         switch (optc) {
@@ -183,6 +195,28 @@ int main(int argc, const char *argv[]) {
             perror("Error: Cannot open program file for disassembly");
             goto cleanup_exit_failure;
         }
+    }
+
+    /*** Determine architecture ***/
+
+    if (arch_str[0] != '\0') {
+        if (strcasecmp(arch_str, "avr") == 0)
+            arch = ARCH_AVR8;
+        else if (strcasecmp(arch_str, "pic-baseline") == 0)
+            arch = ARCH_PIC_BASELINE;
+        else if (strcasecmp(arch_str, "pic-midrange") == 0)
+            arch = ARCH_PIC_MIDRANGE;
+        else if (strcasecmp(arch_str, "pic-enhanced") == 0)
+            arch = ARCH_PIC_MIDRANGE_ENHANCED;
+        else {
+            fprintf(stderr, "Unknown architecture %s.\n", arch_str);
+            fprintf(stderr, "See program help/usage for supported architectures.\n");
+            goto cleanup_exit_failure;
+        }
+    } else {
+        fprintf(stderr, "Error: No architecture specified!\n\n");
+        printUsage(argv[0]);
+        goto cleanup_exit_failure;
     }
 
     /*** Determine input file type ***/
@@ -312,6 +346,18 @@ int main(int argc, const char *argv[]) {
         ds.stream_init = disasm_stream_avr_init;
         ds.stream_close = disasm_stream_avr_close;
         ds.stream_read = disasm_stream_avr_read;
+    } else if (arch == ARCH_PIC_BASELINE) {
+        ds.stream_init = disasm_stream_pic_baseline_init;
+        ds.stream_close = disasm_stream_pic_baseline_close;
+        ds.stream_read = disasm_stream_pic_baseline_read;
+    } else if (arch == ARCH_PIC_MIDRANGE) {
+        ds.stream_init = disasm_stream_pic_midrange_init;
+        ds.stream_close = disasm_stream_pic_midrange_close;
+        ds.stream_read = disasm_stream_pic_midrange_read;
+    } else if (arch == ARCH_PIC_MIDRANGE_ENHANCED) {
+        ds.stream_init = disasm_stream_pic_midrange_enhanced_init;
+        ds.stream_close = disasm_stream_pic_midrange_enhanced_close;
+        ds.stream_read = disasm_stream_pic_midrange_enhanced_read;
     }
 
     /* Setup the Print Stream */

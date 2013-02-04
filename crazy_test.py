@@ -47,10 +47,10 @@ for i in range(NUM_ITERATIONS_TEST1):
     subprocess.check_call(["objcopy", "-I", "binary", "-O", "srec", "bogus1.bin", "bogus1.srec"])
 
     # Generate disassemblies for each file format
-    bogus_bin_disasm = subprocess.check_output(["./vavrdisasm", "-t", "binary", "bogus1.bin"])
-    bogus_gen_disasm = subprocess.check_output(["./vavrdisasm", "-t", "generic", "bogus1.gen"])
-    bogus_ihex_disasm = subprocess.check_output(["./vavrdisasm", "-t", "ihex", "bogus1.hex"])
-    bogus_srec_disasm = subprocess.check_output(["./vavrdisasm", "-t", "srec", "bogus1.srec"])
+    bogus_bin_disasm = subprocess.check_output(["./ucdisasm", "-a", "avr", "-t", "binary", "bogus1.bin"])
+    bogus_gen_disasm = subprocess.check_output(["./ucdisasm", "-a", "avr", "-t", "generic", "bogus1.gen"])
+    bogus_ihex_disasm = subprocess.check_output(["./ucdisasm", "-a", "avr", "-t", "ihex", "bogus1.hex"])
+    bogus_srec_disasm = subprocess.check_output(["./ucdisasm", "-a", "avr", "-t", "srec", "bogus1.srec"])
 
     if (len(bogus_gen_disasm) != len(bogus_bin_disasm) or bogus_gen_disasm != bogus_bin_disasm):
         print "Error! Atmel Generic disassembly differs from Binary disassembly!"
@@ -98,7 +98,7 @@ for i in range(NUM_ITERATIONS_TEST2):
 
     # Generate disassemblies
     objdump_disasm = subprocess.check_output(["avr-objdump", "-b", "binary", "-m", "avr", "-D", "bogus2.bin"])
-    vavrdisasm_disasm = subprocess.check_output(["./vavrdisasm", "-t", "binary", "--no-destination-comments", "bogus2.bin"])
+    vavrdisasm_disasm = subprocess.check_output(["./ucdisasm", "-a", "avr", "-t", "binary", "--no-destination-comments", "bogus2.bin"])
 
     # Split disassemblies by newlines
     objdump_disasm = objdump_disasm.split("\n")
@@ -185,8 +185,8 @@ for i in range(NUM_ITERATIONS_TEST2):
                 continue
 
             print "Found mismatch!"
-            print "objdump:   ", objdump_disasm[i]
-            print "vavrdisasm:", vavrdisasm_disasm[i]
+            print "objdump:    ", objdump_disasm[i]
+            print "vavrdisasm: ", vavrdisasm_disasm[i]
             print "Please send bogus2.bin to the author!"
             print ""
             test2_passed = False
@@ -222,7 +222,7 @@ for i in range(NUM_ITERATIONS_TEST3):
     del bogus_data
 
     # Generate original disassembly
-    vavrdisasm_orig_disasm = subprocess.check_output(["./vavrdisasm", "-t", "binary", "--no-destination-comments", "bogus3.bin"])
+    vavrdisasm_orig_disasm = subprocess.check_output(["./ucdisasm", "-a", "avr", "-t", "binary", "--no-destination-comments", "bogus3.bin"])
     with open('bogus3.bin.orig_disasm', 'w') as bogus_f:
         bogus_f.write(vavrdisasm_orig_disasm)
 
@@ -306,7 +306,7 @@ for i in range(NUM_ITERATIONS_TEST3):
         break
 
     # Generate disassembly again
-    vavrdisasm_second_disasm = subprocess.check_output(["./vavrdisasm", "--no-destination-comments", "bogus3.bin.disasm.hex"])
+    vavrdisasm_second_disasm = subprocess.check_output(["./ucdisasm", "-a", "avr", "--no-destination-comments", "bogus3.bin.disasm.hex"])
     with open('bogus3.bin.second_disasm', 'w') as bogus_f:
         bogus_f.write(vavrdisasm_second_disasm)
 
