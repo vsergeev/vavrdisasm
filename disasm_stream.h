@@ -1,7 +1,6 @@
 #ifndef DISASM_STREAM_H
 #define DISASM_STREAM_H
 
-#include <stdio.h>
 #include <byte_stream.h>
 #include <instruction.h>
 #include <stream_error.h>

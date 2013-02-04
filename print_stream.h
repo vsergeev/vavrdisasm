@@ -1,11 +1,10 @@
 #ifndef PRINT_STREAM_H
 #define PRINT_STREAM_H
 
-#include <stdint.h>
 #include <stdio.h>
 #include <disasm_stream.h>
-#include <stream_error.h>
 #include <instruction.h>
+#include <stream_error.h>
 
 struct PrintStream {
     /* Input stream */

@@ -63,33 +63,33 @@ void pic_instruction_get_opcodes(struct instruction *instr, uint8_t *dest) {
 
 int pic_instruction_get_str_origin(struct instruction *instr, char *dest, int size, int flags) {
     struct picInstructionDisasm *instructionDisasm = (struct picInstructionDisasm *)instr->instructionDisasm;
-    return snprintf(dest, size, "org %s%0*x\n", PIC_PREFIX_ABSOLUTE_ADDRESS, PIC_ADDRESS_WIDTH, instructionDisasm->address);
+    return snprintf(dest, size, "org %s%0*x", PIC_PREFIX_ABSOLUTE_ADDRESS, PIC_ADDRESS_WIDTH, instructionDisasm->address);
 }
 
 int pic_instruction_get_str_address_label(struct instruction *instr, char *dest, int size, int flags) {
     struct picInstructionDisasm *instructionDisasm = (struct picInstructionDisasm *)instr->instructionDisasm;
-    return snprintf(dest, size, "%s%0*x:\t", PIC_PREFIX_ADDRESS_LABEL, PIC_ADDRESS_WIDTH, instructionDisasm->address);
+    return snprintf(dest, size, "%s%0*x:", PIC_PREFIX_ADDRESS_LABEL, PIC_ADDRESS_WIDTH, instructionDisasm->address);
 }
 
 int pic_instruction_get_str_address(struct instruction *instr, char *dest, int size, int flags) {
     struct picInstructionDisasm *instructionDisasm = (struct picInstructionDisasm *)instr->instructionDisasm;
-    return snprintf(dest, size, "%*x:\t", PIC_ADDRESS_WIDTH, instructionDisasm->address);
+    return snprintf(dest, size, "%*x:", PIC_ADDRESS_WIDTH, instructionDisasm->address);
 }
 
 int pic_instruction_get_str_opcodes(struct instruction *instr, char *dest, int size, int flags) {
     struct picInstructionDisasm *instructionDisasm = (struct picInstructionDisasm *)instr->instructionDisasm;
 
     if (instructionDisasm->instructionInfo->width == 1)
-        return snprintf(dest, size, "%02x         \t", instructionDisasm->opcode[0]);
+        return snprintf(dest, size, "%02x         ", instructionDisasm->opcode[0]);
     else if (instructionDisasm->instructionInfo->width == 2)
-        return snprintf(dest, size, "%02x %02x      \t", instructionDisasm->opcode[1], instructionDisasm->opcode[0]);
+        return snprintf(dest, size, "%02x %02x      ", instructionDisasm->opcode[1], instructionDisasm->opcode[0]);
 
     return snprintf(dest, size, "");
 }
 
 int pic_instruction_get_str_mnemonic(struct instruction *instr, char *dest, int size, int flags) {
     struct picInstructionDisasm *instructionDisasm = (struct picInstructionDisasm *)instr->instructionDisasm;
-    return snprintf(dest, size, "%s\t", instructionDisasm->instructionInfo->mnemonic);
+    return snprintf(dest, size, "%s", instructionDisasm->instructionInfo->mnemonic);
 }
 
 int pic_instruction_get_str_operand(struct instruction *instr, char *dest, int size, int index, int flags) {
@@ -149,7 +149,7 @@ int pic_instruction_get_str_operand(struct instruction *instr, char *dest, int s
                 return snprintf(dest, size, "%s%02x", PIC_PREFIX_DATA_HEX, instructionDisasm->operandDisasms[index]);
             }
             break;
-	    /* Mid-range Enhanced Operands */
+        /* Mid-range Enhanced Operands */
         case OPERAND_RELATIVE_ADDRESS:
             /* If we have address labels turned on, replace the relative
              * address with the appropriate address label */
@@ -186,7 +186,7 @@ int pic_instruction_get_str_comment(struct instruction *instr, char *dest, int s
     /* Print destination address comment */
     for (i = 0; i < instructionDisasm->instructionInfo->numOperands; i++) {
         if (instructionDisasm->instructionInfo->operandTypes[i] == OPERAND_RELATIVE_ADDRESS)
-            return snprintf(dest, size, "\t; %s%x", PIC_PREFIX_ABSOLUTE_ADDRESS, instructionDisasm->operandDisasms[i] + instructionDisasm->address + 2);
+            return snprintf(dest, size, "; %s%x", PIC_PREFIX_ABSOLUTE_ADDRESS, instructionDisasm->operandDisasms[i] + instructionDisasm->address + 2);
     }
 
     return snprintf(dest, size, "");

@@ -21,6 +21,5 @@ struct ByteStream {
     int (*stream_read)(struct ByteStream *self, uint8_t *data, uint32_t *address);
 };
 
-
 #endif
 
