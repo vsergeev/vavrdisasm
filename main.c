@@ -7,13 +7,16 @@
 #include <disasm_stream.h>
 #include <print_stream.h>
 
-/* File Support */
+/* File ByteStream Support */
 #include "file/file_support.h"
 
-/* AVR Support */
+/* AVR DisasmStream Support */
 #include "avr/avr_support.h"
-/* PIC Support */
+/* PIC DisasmStream Support */
 #include "pic/pic_support.h"
+
+/* File PrintStream Support */
+#include "print_stream_file.h"
 
 /* Supported file types */
 enum {
@@ -316,7 +319,7 @@ int main(int argc, const char *argv[]) {
 
     /*** Setup disassembler streams ***/
 
-    /* Setup the Byte Stream */
+    /* Setup the ByteStream */
     bs.in = file_in;
     if (file_type == FILE_TYPE_ATMEL_GENERIC) {
         bs.stream_init = byte_stream_generic_init;
@@ -340,7 +343,7 @@ int main(int argc, const char *argv[]) {
         bs.stream_read = byte_stream_binary_read;
     }
 
-    /* Setup the Disasm Stream */
+    /* Setup the DisasmStream */
     ds.in = &bs;
     if (arch == ARCH_AVR8) {
         ds.stream_init = disasm_stream_avr_init;
@@ -360,11 +363,11 @@ int main(int argc, const char *argv[]) {
         ds.stream_read = disasm_stream_pic_midrange_enhanced_read;
     }
 
-    /* Setup the Print Stream */
+    /* Setup the File PrintStream */
     ps.in = &ds;
-    ps.stream_init = print_stream_init;
-    ps.stream_close = print_stream_close;
-    ps.stream_read = print_stream_read;
+    ps.stream_init = print_stream_file_init;
+    ps.stream_close = print_stream_file_close;
+    ps.stream_read = print_stream_file_read;
 
     /* Initialize streams */
     if ((ret = ps.stream_init(&ps, flags)) < 0) {

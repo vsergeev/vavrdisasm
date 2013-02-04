@@ -23,8 +23,6 @@ struct disasm_stream_pic_state {
     unsigned int len;
     /* EOF encountered flag */
     int eof;
-    /* Disassembled instruction */
-    struct picInstructionDisasm instrDisasm;
 };
 
 static int disasm_stream_pic_init(struct DisasmStream *self, int subarch) {
@@ -197,16 +195,37 @@ static int32_t util_disasm_operand(struct picInstructionInfo *instruction, uint3
     return operandDisasm;
 }
 
+extern uint32_t pic_instruction_get_address(struct instruction *instr);
+extern unsigned int pic_instruction_get_width(struct instruction *instr);
+extern unsigned int pic_instruction_get_num_operands(struct instruction *instr);
+extern void pic_instruction_get_opcodes(struct instruction *instr, uint8_t *dest);
+extern int pic_instruction_get_str_origin(struct instruction *instr, char *dest, int size, int flags);
+extern int pic_instruction_get_str_address_label(struct instruction *instr, char *dest, int size, int flags);
+extern int pic_instruction_get_str_address(struct instruction *instr, char *dest, int size, int flags);
+extern int pic_instruction_get_str_opcodes(struct instruction *instr, char *dest, int size, int flags);
+extern int pic_instruction_get_str_mnemonic(struct instruction *instr, char *dest, int size, int flags);
+extern int pic_instruction_get_str_operand(struct instruction *instr, char *dest, int size, int index, int flags);
+extern int pic_instruction_get_str_comment(struct instruction *instr, char *dest, int size, int flags);
+extern void pic_instruction_free(struct instruction *instr);
+
 int disasm_stream_pic_read(struct DisasmStream *self, struct instruction *instr) {
     struct disasm_stream_pic_state *state = (struct disasm_stream_pic_state *)self->state;
 
     int decodeAttempts, lenConsecutive;
 
-    /* Fill disassembled instruction pointer and print functions in instruction
-     * structure */
-    instr->instructionDisasm = (void *)&(state->instrDisasm);
-    instr->print_origin = pic_instruction_print_origin;
-    instr->print = pic_instruction_print;
+    /* Setup the function pointers of the instruction structure */
+    instr->get_address = pic_instruction_get_address;
+    instr->get_width = pic_instruction_get_width;
+    instr->get_num_operands = pic_instruction_get_num_operands;
+    instr->get_opcodes = pic_instruction_get_opcodes;
+    instr->get_str_origin = pic_instruction_get_str_origin;
+    instr->get_str_address_label = pic_instruction_get_str_address_label;
+    instr->get_str_address = pic_instruction_get_str_address;
+    instr->get_str_opcodes = pic_instruction_get_str_opcodes;
+    instr->get_str_mnemonic = pic_instruction_get_str_mnemonic;
+    instr->get_str_operand = pic_instruction_get_str_operand;
+    instr->get_str_comment = pic_instruction_get_str_comment;
+    instr->free = pic_instruction_free;
 
     for (decodeAttempts = 0; decodeAttempts < 3; decodeAttempts++) {
         /* Count the number of consective bytes in our opcode buffer */
@@ -221,18 +240,20 @@ int disasm_stream_pic_read(struct DisasmStream *self, struct instruction *instr)
             /* One lone byte at some address or at EOF */
         if (lenConsecutive == 1 && (state->len > 1 || state->eof)) {
             /* Decode a raw .DB byte "instruction" */
-            memset(&(state->instrDisasm), 0, sizeof(struct picInstructionDisasm));
-            state->instrDisasm.address = state->address[0];
-            state->instrDisasm.opcode[0] = state->data[0];
-            state->instrDisasm.instructionInfo = &PIC_Instruction_Sets[state->subarch][PIC_ISET_INDEX_BYTE(state->subarch)];
-            state->instrDisasm.operandDisasms[0] = (int32_t)state->data[0];
+            instr->instructionDisasm = malloc(sizeof(struct picInstructionDisasm));
+            if (instr->instructionDisasm == NULL) {
+                self->error = "Error allocating memory for disassembled instruction!";
+                return STREAM_ERROR_FAILURE;
+            }
+            struct picInstructionDisasm *instructionDisasm = (struct picInstructionDisasm *)(instr->instructionDisasm);
+
+            memset(instructionDisasm, 0, sizeof(struct picInstructionDisasm));
+            instructionDisasm->address = state->address[0];
+            instructionDisasm->opcode[0] = state->data[0];
+            instructionDisasm->instructionInfo = &PIC_Instruction_Sets[state->subarch][PIC_ISET_INDEX_BYTE(state->subarch)];
+            instructionDisasm->operandDisasms[0] = (int32_t)state->data[0];
             /* Shift out the processed byte(s) from our opcode buffer */
             util_opbuffer_shift(state, 1);
-
-            /* Fill the instruction structure */
-            instr->address = state->instrDisasm.address;
-            instr->width = state->instrDisasm.instructionInfo->width;
-
             return 0;
         }
 
@@ -254,25 +275,27 @@ int disasm_stream_pic_read(struct DisasmStream *self, struct instruction *instr)
             }
 
             /* Decode and return the 16-bit instruction */
-            memset(&(state->instrDisasm), 0, sizeof(struct picInstructionDisasm));
-            state->instrDisasm.address = state->address[0];
-            state->instrDisasm.opcode[0] = state->data[0];
-            state->instrDisasm.opcode[1] = state->data[1];
-            state->instrDisasm.instructionInfo = instructionInfo;
+            instr->instructionDisasm = malloc(sizeof(struct picInstructionDisasm));
+            if (instr->instructionDisasm == NULL) {
+                self->error = "Error allocating memory for disassembled instruction!";
+                return STREAM_ERROR_FAILURE;
+            }
+            struct picInstructionDisasm *instructionDisasm = (struct picInstructionDisasm *)(instr->instructionDisasm);
+
+            memset(instructionDisasm, 0, sizeof(struct picInstructionDisasm));
+            instructionDisasm->address = state->address[0];
+            instructionDisasm->opcode[0] = state->data[0];
+            instructionDisasm->opcode[1] = state->data[1];
+            instructionDisasm->instructionInfo = instructionInfo;
             /* Disassemble the operands */
             for (i = 0; i < instructionInfo->numOperands; i++) {
                 /* Extract the operand bits */
                 operand = util_bits_data_from_mask(opcode, instructionInfo->operandMasks[i]);
                 /* Disassemble the operand */
-                state->instrDisasm.operandDisasms[i] = util_disasm_operand(instructionInfo, operand, i);
+                instructionDisasm->operandDisasms[i] = util_disasm_operand(instructionInfo, operand, i);
             }
             /* Shift out the processed byte(s) from our opcode buffer */
             util_opbuffer_shift(state, 2);
-
-            /* Fill the instruction structure */
-            instr->address = state->instrDisasm.address;
-            instr->width = state->instrDisasm.instructionInfo->width;
-
             return 0;
         }
         /* Otherwise, read another byte into our opcode buffer below */
