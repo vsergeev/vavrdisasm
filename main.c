@@ -13,6 +13,10 @@
 /* AVR Support */
 #include "avr/avr_support.h"
 
+#ifdef _MSC_VER
+#define strcasecmp _strcmpi
+#endif
+
 /* Supported file types */
 enum {
     FILE_TYPE_ATMEL_GENERIC,
@@ -34,6 +38,7 @@ static int no_destination_comments = 0; /* Flag for --no-destination-comments */
 static int no_opcodes = 0;              /* Flag for --no-opcodes */
 static int assembly = 0;                /* Flag for --assembly */
 static int data_base = 0;               /* Base of data constants (hexadecimal, binary, decimal) */
+static int objdump_compatible = 0;      /* Flag for --objdump */
 
 /* Supported data constant bases */
 enum {
@@ -52,6 +57,7 @@ static struct option long_options[] = {
     {"no-opcodes", no_argument, &no_opcodes, 1},
     {"no-addresses", no_argument, &no_addresses, 1},
     {"no-destination-comments", no_argument, &no_destination_comments, 1},
+    {"objdump", no_argument, &objdump_compatible, 1},
     {"help", no_argument, NULL, 'h'},
     {"version", no_argument, NULL, 'v'},
     {NULL, 0, NULL, 0}
@@ -279,6 +285,9 @@ int main(int argc, const char *argv[]) {
 
     if (assembly)
         flags |= PRINT_FLAG_ASSEMBLY;
+
+    if (objdump_compatible)
+        flags |= PRINT_FLAG_OBJDUMP_COMP;
 
     /*** Setup disassembler streams ***/
 
