@@ -381,6 +381,10 @@
 			RelativePath=".\Makefile"
 			>
 		</File>
+		<File
+			RelativePath=".\README.md"
+			>
+		</File>
 	</Files>
 	<Globals>
 	</Globals>
