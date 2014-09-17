@@ -42,6 +42,7 @@ enum {
     PRINT_FLAG_DATA_BIN                = (1<<4),
     PRINT_FLAG_DATA_DEC                = (1<<5),
     PRINT_FLAG_OPCODES                 = (1<<6),
+    PRINT_FLAG_OBJDUMP_COMP            = (1<<7),
 };
 
 /* Print Stream Support */

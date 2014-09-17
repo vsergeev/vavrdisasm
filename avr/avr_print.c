@@ -53,11 +53,21 @@ int avr_instruction_print(struct instruction *instr, FILE *out, int flags) {
             if (fprintf(out, "%02x         \t", instrDisasm->opcode[0]) < 0)
                 return -1;
         } else if (instrDisasm->instructionInfo->width == 2) {
-            if (fprintf(out, "%02x %02x      \t", instrDisasm->opcode[1], instrDisasm->opcode[0]) < 0)
-                return -1;
+            if (flags & PRINT_FLAG_OBJDUMP_COMP) {
+                if (fprintf(out, "%02x %02x      \t", instrDisasm->opcode[0], instrDisasm->opcode[1]) < 0)
+                    return -1;
+            } else {
+                if (fprintf(out, "%02x %02x      \t", instrDisasm->opcode[1], instrDisasm->opcode[0]) < 0)
+                    return -1;
+            }
         } else if (instrDisasm->instructionInfo->width == 4) {
-            if (fprintf(out, "%02x %02x %02x %02x\t", instrDisasm->opcode[3], instrDisasm->opcode[2], instrDisasm->opcode[1], instrDisasm->opcode[0]) < 0)
-                return -1;
+            if (flags & PRINT_FLAG_OBJDUMP_COMP) {
+                if (fprintf(out, "%02x %02x %02x %02x\t", instrDisasm->opcode[0], instrDisasm->opcode[1], instrDisasm->opcode[2], instrDisasm->opcode[3]) < 0)
+                    return -1;
+            } else {
+                if (fprintf(out, "%02x %02x %02x %02x\t", instrDisasm->opcode[3], instrDisasm->opcode[2], instrDisasm->opcode[1], instrDisasm->opcode[0]) < 0)
+                    return -1;
+            }
         }
     }
 
@@ -151,8 +161,13 @@ int avr_instruction_print(struct instruction *instr, FILE *out, int flags) {
                 }
                 break;
             case OPERAND_LONG_ABSOLUTE_ADDRESS:
-                /* Divide the address by two to render a word address */
-                if (fprintf(out, "%s%0*x", AVR_PREFIX_ABSOLUTE_ADDRESS, AVR_ADDRESS_WIDTH, instrDisasm->operandDisasms[i] / 2) < 0) return -1;
+                if (flags & PRINT_FLAG_OBJDUMP_COMP) {
+                    /* Render a byte address like avr-objdump */
+                    if (fprintf(out, "%s%0*x", AVR_PREFIX_ABSOLUTE_ADDRESS, AVR_ADDRESS_WIDTH, instrDisasm->operandDisasms[i]) < 0) return -1;
+                } else {
+                    /* Divide the address by two to render a word address */
+                    if (fprintf(out, "%s%0*x", AVR_PREFIX_ABSOLUTE_ADDRESS, AVR_ADDRESS_WIDTH, instrDisasm->operandDisasms[i] / 2) < 0) return -1;
+                }
                 break;
             case OPERAND_BRANCH_ADDRESS:
             case OPERAND_RELATIVE_ADDRESS:
