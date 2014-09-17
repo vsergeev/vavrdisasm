@@ -62,6 +62,8 @@ vAVRdisasm should have no problem being compiled with "gmake".
                                       disassembly.
       --no-destination-comments     Do not display destination address comments
                                       of relative branch/jump/call instructions.
+      --objdump                     Create avr-objdump-compatible output.
+                                      Affects address display.
     
       -h, --help                    Display this usage/help.
       -v, --version                 Display the program's version.
