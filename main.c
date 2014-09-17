@@ -13,6 +13,10 @@
 /* AVR Support */
 #include "avr/avr_support.h"
 
+#ifdef _MSC_VER
+#define strcasecmp _strcmpi
+#endif
+
 /* Supported file types */
 enum {
     FILE_TYPE_ATMEL_GENERIC,

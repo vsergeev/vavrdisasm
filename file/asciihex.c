@@ -44,11 +44,12 @@ int byte_stream_asciihex_close(struct ByteStream *self) {
 }
 
 static uint8_t util_hex2num(char c) {
-    switch (c) {
-        case '0' ... '9': return (c - '0');
-        case 'a' ... 'f': return (c - 'a') + 10;
-        case 'A' ... 'F': return (c - 'A') + 10;
-    }
+    if (c >= '0' && c <= '9')
+        return (c - '0');
+    else if (c >= 'a' && c <= 'f')
+        return (c - 'a') + 10;
+    else if (c >= 'A' && c <= 'F')
+        return (c - 'A') + 10;
     return 0;
 }
 

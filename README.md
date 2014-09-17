@@ -16,6 +16,8 @@ vAVRdisasm features a handful of formatting options, including:
 
 vAVRdisasm should work on most *nix platforms, including a [Cygwin](http://www.cygwin.com/) or [MinGW](http://www.mingw.org/) environment. vAVRdisasm was written by Vanya A. Sergeev, and tested with the GNU C Compiler on Linux. Feel free to send any ideas or suggestions to vsergeev at gmail dot com.
 
+Visual Studio 2008 build support added by Hermann Seib.
+
 ## LICENSE
 
 vAVRdisasm is released under the GNU General Public License Version 3.
