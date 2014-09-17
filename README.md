@@ -15,6 +15,7 @@ vAVRdisasm features a handful of formatting options, including:
   * Piped input and output
 
 vAVRdisasm should work on most *nix platforms, including a [Cygwin](http://www.cygwin.com/) or [MinGW](http://www.mingw.org/) environment. vAVRdisasm was written by Vanya A. Sergeev, and tested with the GNU C Compiler on Linux. Feel free to send any ideas or suggestions to vsergeev at gmail dot com.
+
 VS2008 build added by Hermann Seib.
 
 ## LICENSE
