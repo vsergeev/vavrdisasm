@@ -210,6 +210,11 @@ int disasm_stream_avr_read(struct DisasmStream *self, struct instruction *instr)
 
     int decodeAttempts, lenConsecutive;
 
+    uint8_t readData;
+    uint32_t readAddr;
+    int ret;
+
+
     /* Fill disassembled instruction pointer and print functions in instruction
      * structure */
     instr->instructionDisasm = (void *)&(state->instrDisasm);
@@ -345,10 +350,6 @@ int disasm_stream_avr_read(struct DisasmStream *self, struct instruction *instr)
                 /* Otherwise, read another byte into our opcode buffer below */
             }
         }
-
-        uint8_t readData;
-        uint32_t readAddr;
-        int ret;
 
         /* Read the next data byte from the opcode stream */
         ret = self->in->stream_read(self->in, &readData, &readAddr);

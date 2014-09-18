@@ -13,6 +13,10 @@
 #include <stdlib.h>
 #include <string.h>
 
+#if defined(_MSC_VER)
+#define snprintf _snprintf
+#endif
+
 /* General definition of the S-Record specification */
 enum _SRecordDefinitions {
 	/* 768 should be plenty of space to read in an S-Record */

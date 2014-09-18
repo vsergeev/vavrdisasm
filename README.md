@@ -16,6 +16,8 @@ vAVRdisasm features a handful of formatting options, including:
 
 vAVRdisasm should work on most *nix platforms, including a [Cygwin](http://www.cygwin.com/) or [MinGW](http://www.mingw.org/) environment. vAVRdisasm was written by Vanya A. Sergeev, and tested with the GNU C Compiler on Linux. Feel free to send any ideas or suggestions to vsergeev at gmail dot com.
 
+VS2008 build added by Hermann Seib.
+
 ## LICENSE
 
 vAVRdisasm is released under the GNU General Public License Version 3.
@@ -62,6 +64,8 @@ vAVRdisasm should have no problem being compiled with "gmake".
                                       disassembly.
       --no-destination-comments     Do not display destination address comments
                                       of relative branch/jump/call instructions.
+      --objdump                     Create avr-objdump-compatible output.
+                                      Affects address display.
     
       -h, --help                    Display this usage/help.
       -v, --version                 Display the program's version.
