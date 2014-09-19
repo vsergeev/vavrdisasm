@@ -335,7 +335,7 @@ else:
 
 
 if test1_passed and test2_passed and test3_passed:
-    print "SUCCESS all tests pasts"
+    print "SUCCESS all tests passed"
     sys.exit(0)
 
 sys.exit(-1)
