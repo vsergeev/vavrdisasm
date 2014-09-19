@@ -1,30 +1,48 @@
+PROGNAME = vavrdisasm
+PREFIX = /usr
+BINDIR = $(PREFIX)/bin
+
+################################################################################
+
+LIBGIS_SOURCES = file/libGIS-1.0.5/atmel_generic.c file/libGIS-1.0.5/ihex.c file/libGIS-1.0.5/srecord.c
+FILE_SOURCES = file/atmel_generic.c file/ihex.c file/srecord.c file/binary.c file/debug.c file/test.c file/asciihex.c
+AVR_SOURCES = avr/avr_instruction_set.c avr/avr_disasm.c avr/avr_print.c
+PRINT_SOURCES = print_stream.c
+SOURCES = $(LIBGIS_SOURCES) $(FILE_SOURCES) $(AVR_SOURCES) $(PRINT_SOURCES) main.c
+
+################################################################################
+
+BUILD_DIR = build
+OBJECTS = $(patsubst %.c,$(BUILD_DIR)/%.o,$(SOURCES))
+
+################################################################################
+
 CC = gcc
 CFLAGS = -Wall -O3 -D_GNU_SOURCE -I.
 LDFLAGS=
-LIBGIS_OBJECTS = file/libGIS-1.0.5/atmel_generic.o file/libGIS-1.0.5/ihex.o file/libGIS-1.0.5/srecord.o
-FILE_OBJECTS = $(LIBGIS_OBJECTS) file/atmel_generic.o file/ihex.o file/srecord.o file/binary.o file/debug.o file/test.o file/asciihex.o
-AVR_OBJECTS = avr/avr_instruction_set.o avr/avr_disasm.o avr/avr_print.o
-PRINT_OBJECTS = print_stream.o
-OBJECTS = $(FILE_OBJECTS) $(AVR_OBJECTS) $(PRINT_OBJECTS) main.o
 
-PROGNAME = vavrdisasm
-PREFIX = /usr/local
-BINDIR = $(PREFIX)/bin
+################################################################################
 
 all: $(PROGNAME)
 
-install: $(PROGNAME)
-	install -D -s -m 0755 $(PROGNAME) $(DESTDIR)$(BINDIR)/$(PROGNAME)
-
 $(PROGNAME): $(OBJECTS)
-	$(CC) $(LDFLAGS) -o $@ $(OBJECTS)
+	$(CC) $(LDFLAGS) $(OBJECTS) -o $@
 
 clean:
-	rm -rf $(PROGNAME) $(OBJECTS)
+	rm -rf $(PROGNAME) $(BUILD_DIR)
 
 test: $(PROGNAME)
 	python2 crazy_test.py
 
+install: $(PROGNAME)
+	install -D -s -m 0755 $(PROGNAME) $(DESTDIR)$(BINDIR)/$(PROGNAME)
+
 uninstall:
 	rm -f $(DESTDIR)$(BINDIR)/$(PROGNAME)
+
+################################################################################
+
+$(BUILD_DIR)/%.o: %.c
+	@mkdir -p $(@D)
+	$(CC) $(CFLAGS) -c $< -o $@
 
