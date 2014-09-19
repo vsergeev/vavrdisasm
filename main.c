@@ -66,9 +66,9 @@ static struct option long_options[] = {
 static void printUsage(const char *programName) {
     printf("Usage: %s [options] <file>\n", programName);
     printf("Disassembles program file <file>. Use - for standard input.\n\n");
-    printf("vAVRdisasm version 3.0 - 02/01/2013.\n");
-    printf("Written by Vanya A. Sergeev - <vsergeev@gmail.com>.\n\n");
-    printf("Additional Options:\n\
+    printf("vAVRdisasm version 3.1 - 09/18/2014.\n");
+    printf("Vanya A. Sergeev - <vsergeev@gmail.com>\n");
+    printf("https://github.com/vsergeev/vavrdisasm\n\n");
     printf("Options:\n\
   -o, --out-file <file>         Write to file instead of standard output.\n\
 \n\
@@ -100,8 +100,9 @@ static void printUsage(const char *programName) {
 }
 
 static void printVersion(void) {
-    printf("vAVRdisasm version 3.0 - 02/01/2013.\n");
-    printf("Written by Vanya Sergeev - <vsergeev@gmail.com>\n");
+    printf("vAVRdisasm version 3.1 - 09/18/2014.\n");
+    printf("Vanya A. Sergeev - <vsergeev@gmail.com>\n");
+    printf("https://github.com/vsergeev/vavrdisasm\n");
 }
 
 void print_stream_error_trace(struct PrintStream *ps, struct DisasmStream *ds, struct ByteStream *bs) {
