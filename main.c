@@ -247,9 +247,9 @@ int main(int argc, const char *argv[]) {
         file_out = stdout;
     }
 
-    /*** Debug ***/
+    /*** Debug Mode ***/
 
-    #ifdef DEBUG_BYTE_STREAM
+    #if defined (DEBUG_BYTE_STREAM)
         /* Test opcode stream */
         if (file_type == FILE_TYPE_ATMEL_GENERIC)
             test_byte_stream(file_in, byte_stream_generic_init, byte_stream_generic_close, byte_stream_generic_read);
@@ -260,11 +260,11 @@ int main(int argc, const char *argv[]) {
         else if (file_type == FILE_TYPE_BINARY)
             test_byte_stream(file_in, byte_stream_binary_init, byte_stream_binary_close, byte_stream_binary_read);
         goto cleanup_exit_success;
-    #elif defined DEBUG_DISASM_STREAM
+    #elif defined (DEBUG_DISASM_STREAM)
         /* Test Disasm Stream */
         test_disasm_stream_unit_tests();
         goto cleanup_exit_success;
-    #elif defined DEBUG_PRINT_STREAM
+    #elif defined (DEBUG_PRINT_STREAM)
         /* Test Print Stream */
         test_print_stream();
         goto cleanup_exit_success;
@@ -354,7 +354,9 @@ int main(int argc, const char *argv[]) {
         goto cleanup_exit_failure;
     }
 
+    #if defined (DEBUG_BYTE_STREAM) || defined (DEBUG_DISASM_STREAM) || defined (DEBUG_PRINT_STREAM)
     cleanup_exit_success:
+    #endif
     if (file_out != stdout && file_out != NULL)
         fclose(file_out);
     exit(EXIT_SUCCESS);

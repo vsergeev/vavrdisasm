@@ -104,6 +104,7 @@ static struct avrInstructionInfo *util_iset_lookup_by_opcode(uint16_t opcode) {
     return NULL;
 }
 
+#if 0
 static struct avrInstructionInfo *util_iset_lookup_by_mnemonic(char *mnemonic) {
     int i;
 
@@ -114,6 +115,7 @@ static struct avrInstructionInfo *util_iset_lookup_by_mnemonic(char *mnemonic) {
 
     return NULL;
 }
+#endif
 
 static int util_opbuffer_len_consecutive(struct disasm_stream_avr_state *state) {
     int i, lenConsecutive;
