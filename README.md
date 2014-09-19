@@ -40,13 +40,13 @@ vAVRdisasm should have no problem being compiled with "gmake".
 
 ## USAGE
 
-    Usage: ./vavrdisasm <option(s)> <file>
+    Usage: ./vavrdisasm [options] <file>
     Disassembles AVR program file <file>. Use - for standard input.
     
     vAVRdisasm version 3.0 - 02/01/2013.
     Written by Vanya A. Sergeev - <vsergeev@gmail.com>.
     
-    Additional Options:
+    Options:
       -o, --out-file <file>         Write to file instead of standard output.
     
       -t, --file-type <type>        Specify file type of the program file.

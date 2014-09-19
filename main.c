@@ -64,11 +64,12 @@ static struct option long_options[] = {
 };
 
 static void printUsage(const char *programName) {
-    printf("Usage: %s <option(s)> <file>\n", programName);
+    printf("Usage: %s [options] <file>\n", programName);
     printf("Disassembles program file <file>. Use - for standard input.\n\n");
     printf("vAVRdisasm version 3.0 - 02/01/2013.\n");
     printf("Written by Vanya A. Sergeev - <vsergeev@gmail.com>.\n\n");
     printf("Additional Options:\n\
+    printf("Options:\n\
   -o, --out-file <file>         Write to file instead of standard output.\n\
 \n\
   -t, --file-type <type>        Specify file type of the program file.\n\
@@ -174,7 +175,6 @@ int main(int argc, const char *argv[]) {
 
     /* If there are no more arguments left */
     if (optind == argc) {
-        fprintf(stderr, "Error: No program file specified! Use - for standard input.\n\n");
         printUsage(argv[0]);
         goto cleanup_exit_failure;
     }
