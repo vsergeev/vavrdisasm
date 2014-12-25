@@ -35,7 +35,8 @@ test: $(PROGNAME)
 	python2 crazy_test.py
 
 install: $(PROGNAME)
-	install -D -s -m 0755 $(PROGNAME) $(DESTDIR)$(BINDIR)/$(PROGNAME)
+	mkdir -p $(DESTDIR)$(BINDIR)
+	install -s -m 0755 $(PROGNAME) $(DESTDIR)$(BINDIR)/$(PROGNAME)
 
 uninstall:
 	rm -f $(DESTDIR)$(BINDIR)/$(PROGNAME)
