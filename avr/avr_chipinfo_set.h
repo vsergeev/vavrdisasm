@@ -7,8 +7,18 @@ struct AvrChipIoRegInfo {
     char *comment;
 };
 
+struct AvrChipIntInfo {
+    unsigned int address;
+    char *name;
+    char *comment;
+};
+
 struct AvrChipInfo {
     char name[10];
+
+    unsigned int interruptCount;
+    struct AvrChipIntInfo *interrupts;
+
     unsigned int ioRegCount;
     struct AvrChipIoRegInfo *ioRegs;
 };

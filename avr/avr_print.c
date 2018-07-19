@@ -193,7 +193,17 @@ int avr_instruction_print(struct instruction *instr, FILE *out, int flags) {
 
     /* Print destination address comment */
     if (flags & PRINT_FLAG_DESTINATION_COMMENT) {
-        struct AvrChipIoRegInfo ioReg;
+        if (instr->chip_info) {
+            for (unsigned int i = 0; i < instr->chip_info->interruptCount; ++i) {
+                if (instr->address == instr->chip_info->interrupts[i].address) {
+                    if (fprintf(out, "\t; %s (%s)",
+                                instr->chip_info->interrupts[i].name,
+                                instr->chip_info->interrupts[i].comment) == 0) return 1;
+                    break; // Stop looking for match when found
+                }
+            }
+        }
+
         for (i = 0; i < instrDisasm->instructionInfo->numOperands; i++) {
             switch(instrDisasm->instructionInfo->operandTypes[i]) {
                 case OPERAND_BRANCH_ADDRESS:
@@ -202,8 +212,14 @@ int avr_instruction_print(struct instruction *instr, FILE *out, int flags) {
                     break;
                 case OPERAND_IO_REGISTER:
                     if (instr->chip_info) {
-                        ioReg = instr->chip_info->ioRegs[ instrDisasm->operandDisasms[i] ];
-                        if (fprintf(out, "\t; %s (%s)", ioReg.name, ioReg.comment) < 0) return -1;
+                        for (unsigned int r = 0; r < instr->chip_info->ioRegCount; ++r) {
+                            if (instrDisasm->operandDisasms[i] == instr->chip_info->ioRegs[r].address) {
+                                if (fprintf(out, "\t; %s (%s)",
+                                            instr->chip_info->ioRegs[r].name,
+                                            instr->chip_info->ioRegs[r].comment) < 0) return -1;
+                                break; // Stop looking for match when found
+                            }
+                        }
                     }
             }
         }

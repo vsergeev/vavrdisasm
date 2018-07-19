@@ -1,6 +1,35 @@
 #include "avr_chipinfo_set.h"
 
-#define ChipInfo(n, r) {n, sizeof(r)/sizeof(r[0]), r}
+#define LenAndRef(r) sizeof(r)/sizeof(r[0]), r
+#define ChipInfo(n, i, r) {n, LenAndRef(i), LenAndRef(r)}
+
+struct AvrChipIntInfo chip_Atmega328P_Interrupts[] = {
+    {0x0000, "__RESET", "External Pin, Power-on Reset, Brown-out Reset, Watchdog Reset, and JTAG AVR Reset"},
+    {0x0004, "INT0_", "External Interrupt Request 0"},
+    {0x0008, "INT1_", "External Interrupt Request 1"},
+    {0x000c, "PCINT0_", "Pin Change Interrupt Request 0"},
+    {0x0010, "PCINT1_", "Pin Change Interrupt Request 1"},
+    {0x0014, "PCINT2_", "Pin Change Interrupt Request 2"},
+    {0x0018, "WDT", "Watchdog Time-out Interrupt"},
+    {0x001c, "TIMER2_COMPA", "Timer/Counter2 Compare Match A"},
+    {0x0020, "TIMER2_COMPB", "Timer/Counter2 Compare Match B"},
+    {0x0034, "TIMER2_OVF", "Timer/Counter1 Overflow"},
+    {0x0028, "TIMER1_CAPT", "Timer/Counter1 Compare Match"},
+    {0x002c, "TIMER1_COMPA", "Timer/Counter1 Compare Match A"},
+    {0x0030, "TIMER1_COMPB", "Timer/Counter1 Compare Match A"},
+    {0x0038, "TIMER0_COMPA", "Timer/Counter0 Compare Match A"},
+    {0x003c, "TIMER0_COMPB", "Timer/Counter0 Compare Match B"},
+    {0x0040, "TIMER0_OVF", "Timer/Counter0 Overflow"},
+    {0x0044, "SPI_STC", "Serial Transfer Complete"},
+    {0x0048, "USART0_RXC", "USART Rx Complete"},
+    {0x004c, "USART0_UDRE", "USART Data Register Empty"},
+    {0x0050, "USART0_TXC", "USART Tx Complete"},
+    {0x0054, "ADC", "ADC Conversion Complete"},
+    {0x0058, "EE_READY", "EEPROM Ready"},
+    {0x005c, "ANALOG_COMP", "Analog Comparator"},
+    {0x0060, "TWI", "2-wire Serial Interface"},
+    {0x0064, "SPM_READY", "Store Program Memory Ready"},
+};
 
 struct AvrChipIoRegInfo chip_Atmega328P_Ioregs[] = {
     {0x0003, "PINB", "Port B Input Pins Address"},
@@ -91,7 +120,7 @@ struct AvrChipIoRegInfo chip_Atmega328P_Ioregs[] = {
 };
 
 struct AvrChipInfo AVR_ChipInfo_Set[] = {
-    ChipInfo("ATmega328P", chip_Atmega328P_Ioregs)
+    ChipInfo("ATmega328P", chip_Atmega328P_Interrupts, chip_Atmega328P_Ioregs)
 };
 
 int AVR_TOTAL_CHIPINFOS = (sizeof(AVR_ChipInfo_Set)/sizeof(AVR_ChipInfo_Set[0]));
