@@ -6,7 +6,7 @@ BINDIR = $(PREFIX)/bin
 
 LIBGIS_SOURCES = file/libGIS-1.0.5/atmel_generic.c file/libGIS-1.0.5/ihex.c file/libGIS-1.0.5/srecord.c
 FILE_SOURCES = file/atmel_generic.c file/ihex.c file/srecord.c file/binary.c file/debug.c file/test.c file/asciihex.c
-AVR_SOURCES = avr/avr_instruction_set.c avr/avr_disasm.c avr/avr_print.c
+AVR_SOURCES = avr/avr_instruction_set.c avr/avr_disasm.c avr/avr_print.c avr/avr_chipinfo_set.c
 PRINT_SOURCES = print_stream.c
 SOURCES = $(LIBGIS_SOURCES) $(FILE_SOURCES) $(AVR_SOURCES) $(PRINT_SOURCES) main.c
 

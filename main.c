@@ -13,6 +13,9 @@
 /* AVR Support */
 #include "avr/avr_support.h"
 
+/* AVR Chip Info */
+#include "avr/avr_chipinfo_set.h"
+
 #ifdef _MSC_VER
 #define strcasecmp _strcmpi
 #endif
@@ -49,6 +52,7 @@ enum {
 
 static struct option long_options[] = {
     {"file-type", required_argument, NULL, 't'},
+    {"chip-type", required_argument, NULL, 'c'},
     {"out-file", required_argument, NULL, 'o'},
     {"assembly", no_argument, &assembly, 1},
     {"data-base-hex", no_argument, &data_base, DATA_BASE_HEX},
@@ -74,6 +78,8 @@ static void printUsage(const char *programName) {
 \n\
   -t, --file-type <type>        Specify file type of the program file.\n\
 \n\
+  -c, --chip <chip>             Specify chip to enable I/O register description.\n\
+\n\
   --assembly                    Produce assemble-able code with address labels.\n\
 \n\
   --data-base-hex               Represent data constants in hexadecimal\n\
@@ -97,6 +103,9 @@ static void printUsage(const char *programName) {
   Motorola S-Record         srec\n\
   Raw Binary                binary\n\
   ASCII Hex                 ascii\n\n");
+    printf("Supported chips:\n\
+  ATmega328\n\
+  ATmega328p\n\n");
 }
 
 static void printVersion(void) {
@@ -130,6 +139,7 @@ int main(int argc, const char *argv[]) {
     char arch_str[16] = {0};
     char file_type_str[8] = {0};
     char file_out_str[4096] = {0};
+    char chip_type_str[12] = {0};
 
     /* Input / Output files */
     FILE *file_in = NULL, *file_out = NULL;
@@ -138,6 +148,7 @@ int main(int argc, const char *argv[]) {
     int file_type = 0;
     int arch = ARCH_AVR8;
     int flags = 0;
+    struct AvrChipInfo *chip_info = NULL;
     struct ByteStream bs;
     struct DisasmStream ds;
     struct PrintStream ps;
@@ -145,7 +156,7 @@ int main(int argc, const char *argv[]) {
 
     /* Parse command line options */
     while (1) {
-        optc = getopt_long(argc, (char * const *)argv, "o:t:l:hv", long_options, NULL);
+        optc = getopt_long(argc, (char * const *)argv, "o:t:c:l:hv", long_options, NULL);
         if (optc == -1)
             break;
         switch (optc) {
@@ -157,6 +168,9 @@ int main(int argc, const char *argv[]) {
                 break;
             case 't':
                 strncpy(file_type_str, optarg, sizeof(file_type_str));
+                break;
+            case 'c':
+                strncpy(chip_type_str, optarg, sizeof(chip_type_str));
                 break;
             case 'o':
                 if (strcmp(optarg, "-") != 0)
@@ -232,6 +246,17 @@ int main(int argc, const char *argv[]) {
             goto cleanup_exit_failure;
         }
         ungetc(c, file_in);
+    }
+
+    /*** Determine chip type ***/
+
+    /* If chip type was specified */
+    if (chip_type_str[0] != '\0') {
+        for (unsigned int i = 0; i<AVR_TOTAL_CHIPINFOS; ++i) {
+            if (strcasecmp(chip_type_str, AVR_ChipInfo_Set[i].name) == 0) {
+                chip_info = &(AVR_ChipInfo_Set[i]);
+            }
+        }
     }
 
     /*** Open output file ***/
@@ -324,6 +349,7 @@ int main(int argc, const char *argv[]) {
         ds.stream_init = disasm_stream_avr_init;
         ds.stream_close = disasm_stream_avr_close;
         ds.stream_read = disasm_stream_avr_read;
+        ds.chip_info = chip_info;
     }
 
     /* Setup the Print Stream */

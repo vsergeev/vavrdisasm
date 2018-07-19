@@ -5,6 +5,7 @@
 #include <instruction.h>
 
 #include "avr_instruction_set.h"
+#include "avr_chipinfo_set.h"
 
 /* AVRASM format prefixes */
 #define AVR_PREFIX_REGISTER             "R"  /* mov R0, R2 */
@@ -192,15 +193,21 @@ int avr_instruction_print(struct instruction *instr, FILE *out, int flags) {
 
     /* Print destination address comment */
     if (flags & PRINT_FLAG_DESTINATION_COMMENT) {
+        struct AvrChipIoRegInfo ioReg;
         for (i = 0; i < instrDisasm->instructionInfo->numOperands; i++) {
-            if ( instrDisasm->instructionInfo->operandTypes[i] == OPERAND_BRANCH_ADDRESS ||
-                 instrDisasm->instructionInfo->operandTypes[i] == OPERAND_RELATIVE_ADDRESS) {
-                if (fprintf(out, "\t; %s%x", AVR_PREFIX_ABSOLUTE_ADDRESS, instrDisasm->operandDisasms[i] + instrDisasm->address + 2) < 0)
-                    return -1;
+            switch(instrDisasm->instructionInfo->operandTypes[i]) {
+                case OPERAND_BRANCH_ADDRESS:
+                case OPERAND_RELATIVE_ADDRESS:
+                    if (fprintf(out, "\t; %s%x", AVR_PREFIX_ABSOLUTE_ADDRESS, instrDisasm->operandDisasms[i] + instrDisasm->address + 2) < 0) return -1;
+                    break;
+                case OPERAND_IO_REGISTER:
+                    if (instr->chip_info) {
+                        ioReg = instr->chip_info->ioRegs[ instrDisasm->operandDisasms[i] ];
+                        if (fprintf(out, "\t; %s (%s)", ioReg.name, ioReg.comment) < 0) return -1;
+                    }
             }
         }
     }
 
     return 0;
 }
-
