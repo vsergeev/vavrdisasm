@@ -1,6 +1,8 @@
 #include "avr_chipinfo_set.h"
 
-struct AvrChipIoRegInfo chipAtmegaIoregs[] = {
+#define ChipInfo(n, r) {n, sizeof(r)/sizeof(r[0]), r}
+
+struct AvrChipIoRegInfo chip_Atmega328P_Ioregs[] = {
     {0x0003, "PINB", "Port B Input Pins Address"},
     {0x0004, "DDRB", "Port B Data Direction Register"},
     {0x0005, "PORTB", "Port B Data Register"},
@@ -89,7 +91,7 @@ struct AvrChipIoRegInfo chipAtmegaIoregs[] = {
 };
 
 struct AvrChipInfo AVR_ChipInfo_Set[] = {
-    {"ATmega328P", sizeof(chipAtmegaIoregs)/sizeof(chipAtmegaIoregs[0]), chipAtmegaIoregs}
+    ChipInfo("ATmega328P", chip_Atmega328P_Ioregs)
 };
 
 int AVR_TOTAL_CHIPINFOS = (sizeof(AVR_ChipInfo_Set)/sizeof(AVR_ChipInfo_Set[0]));
