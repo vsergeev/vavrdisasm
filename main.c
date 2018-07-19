@@ -257,6 +257,10 @@ int main(int argc, const char *argv[]) {
                 chip_info = &(AVR_ChipInfo_Set[i]);
             }
         }
+        if (!chip_info) {
+            fprintf(stderr, "Invalid chip type specified (%s).\n", chip_type_str);
+            goto cleanup_exit_failure;
+        }
     }
 
     /*** Open output file ***/
