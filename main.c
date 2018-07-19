@@ -103,9 +103,10 @@ static void printUsage(const char *programName) {
   Motorola S-Record         srec\n\
   Raw Binary                binary\n\
   ASCII Hex                 ascii\n\n");
-    printf("Supported chips:\n\
-  ATmega328\n\
-  ATmega328p\n\n");
+    printf("Supported chips:\n");
+    for (unsigned int i = 0; i<AVR_TOTAL_CHIPINFOS; ++i) {
+        printf("  %s\n", AVR_ChipInfo_Set[i].name);
+    }
 }
 
 static void printVersion(void) {
