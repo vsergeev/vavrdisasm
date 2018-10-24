@@ -5,6 +5,7 @@
 #include <instruction.h>
 
 #include "avr_instruction_set.h"
+#include "avr_chipinfo_set.h"
 
 /* AVRASM format prefixes */
 #define AVR_PREFIX_REGISTER             "R"  /* mov R0, R2 */
@@ -192,15 +193,50 @@ int avr_instruction_print(struct instruction *instr, FILE *out, int flags) {
 
     /* Print destination address comment */
     if (flags & PRINT_FLAG_DESTINATION_COMMENT) {
+        if (instr->chip_info) {
+            for (unsigned int i = 0; i < instr->chip_info->interruptCount; ++i) {
+                if (instr->address == instr->chip_info->interrupts[i].address) {
+                    if (fprintf(out, "\t; %s (%s)",
+                                instr->chip_info->interrupts[i].name,
+                                instr->chip_info->interrupts[i].comment) == 0) return 1;
+                    break; // Stop looking for match when found
+                }
+            }
+        }
+
         for (i = 0; i < instrDisasm->instructionInfo->numOperands; i++) {
-            if ( instrDisasm->instructionInfo->operandTypes[i] == OPERAND_BRANCH_ADDRESS ||
-                 instrDisasm->instructionInfo->operandTypes[i] == OPERAND_RELATIVE_ADDRESS) {
-                if (fprintf(out, "\t; %s%x", AVR_PREFIX_ABSOLUTE_ADDRESS, instrDisasm->operandDisasms[i] + instrDisasm->address + 2) < 0)
-                    return -1;
+            switch(instrDisasm->instructionInfo->operandTypes[i]) {
+                case OPERAND_BRANCH_ADDRESS:
+                case OPERAND_RELATIVE_ADDRESS:
+                    if (fprintf(out, "\t; %s%x", AVR_PREFIX_ABSOLUTE_ADDRESS, instrDisasm->operandDisasms[i] + instrDisasm->address + 2) < 0) return -1;
+                    break;
+                case OPERAND_LONG_ABSOLUTE_ADDRESS:
+                    if (instr->chip_info && (instrDisasm->instructionInfo->instructionMask == 0x9200 || instrDisasm->instructionInfo->instructionMask == 0x9000)) { // Only if chip_info is available and only for sts and lds (based on instructionMask)
+                        for (unsigned int r = 0; r < instr->chip_info->regCount; ++r) {
+                            if (instrDisasm->operandDisasms[i]/2 == instr->chip_info->regs[r].address) {
+                                if (fprintf(out, "\t; %s (%s)",
+                                            instr->chip_info->regs[r].name,
+                                            instr->chip_info->regs[r].comment) < 0) return -1;
+                                break; // Stop looking for match when found
+                            }
+                        }
+                    }
+                    break;
+                case OPERAND_IO_REGISTER:
+                    if (instr->chip_info) {
+                        for (unsigned int r = 0; r < instr->chip_info->ioRegCount; ++r) {
+                            if (instrDisasm->operandDisasms[i] == instr->chip_info->ioRegs[r].address) {
+                                if (fprintf(out, "\t; %s (%s)",
+                                            instr->chip_info->ioRegs[r].name,
+                                            instr->chip_info->ioRegs[r].comment) < 0) return -1;
+                                break; // Stop looking for match when found
+                            }
+                        }
+                    }
+                    break;
             }
         }
     }
 
     return 0;
 }
-

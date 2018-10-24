@@ -220,6 +220,7 @@ int disasm_stream_avr_read(struct DisasmStream *self, struct instruction *instr)
     instr->instructionDisasm = (void *)&(state->instrDisasm);
     instr->print_origin = avr_instruction_print_origin;
     instr->print = avr_instruction_print;
+    instr->chip_info = self->chip_info;
 
     for (decodeAttempts = 0; decodeAttempts < 5; decodeAttempts++) {
         /* Count the number of consective bytes in our opcode buffer */

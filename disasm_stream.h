@@ -20,6 +20,9 @@ struct DisasmStream {
     int (*stream_close)(struct DisasmStream *self);
     /* Output function */
     int (*stream_read)(struct DisasmStream *self, struct instruction *instr);
+
+    /* Chip Info */
+    struct AvrChipInfo *chip_info;
 };
 
 #endif
