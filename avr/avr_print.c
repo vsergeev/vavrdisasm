@@ -210,6 +210,18 @@ int avr_instruction_print(struct instruction *instr, FILE *out, int flags) {
                 case OPERAND_RELATIVE_ADDRESS:
                     if (fprintf(out, "\t; %s%x", AVR_PREFIX_ABSOLUTE_ADDRESS, instrDisasm->operandDisasms[i] + instrDisasm->address + 2) < 0) return -1;
                     break;
+                case OPERAND_LONG_ABSOLUTE_ADDRESS:
+                    if (instr->chip_info && (instrDisasm->instructionInfo->instructionMask == 0x9200 || instrDisasm->instructionInfo->instructionMask == 0x9000)) { // Only if chip_info is available and only for sts and lds (based on instructionMask)
+                        for (unsigned int r = 0; r < instr->chip_info->regCount; ++r) {
+                            if (instrDisasm->operandDisasms[i]/2 == instr->chip_info->regs[r].address) {
+                                if (fprintf(out, "\t; %s (%s)",
+                                            instr->chip_info->regs[r].name,
+                                            instr->chip_info->regs[r].comment) < 0) return -1;
+                                break; // Stop looking for match when found
+                            }
+                        }
+                    }
+                    break;
                 case OPERAND_IO_REGISTER:
                     if (instr->chip_info) {
                         for (unsigned int r = 0; r < instr->chip_info->ioRegCount; ++r) {
@@ -221,6 +233,7 @@ int avr_instruction_print(struct instruction *instr, FILE *out, int flags) {
                             }
                         }
                     }
+                    break;
             }
         }
     }
